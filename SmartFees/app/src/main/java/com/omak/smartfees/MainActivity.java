@@ -6,6 +6,9 @@ import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
+import com.omak.smartfees.Global.Constants;
+import com.omak.smartfees.Global.Utils;
+
 import java.util.Calendar;
 
 public class MainActivity extends Activity {
@@ -28,8 +31,12 @@ public class MainActivity extends Activity {
 
             if (mHandlerFlag) {
                 // Finish the current Activity and start HomePage Activity
-                Intent home = new Intent(MainActivity.this,
-                        LoginActivity.class);
+                Intent home;
+                if(Utils.getBooleanSharedPreference(MainActivity.this, Constants.SHARED_PREF_IS_LOGGED_IN)) {
+                    home = new Intent(MainActivity.this, MainHomeActivity.class);
+                } else {
+                    home = new Intent(MainActivity.this, LoginActivity.class);
+                }
                 startActivity(home);
                 MainActivity.this.finish();
             }

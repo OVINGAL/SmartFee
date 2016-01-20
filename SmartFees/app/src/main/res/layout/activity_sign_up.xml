@@ -5,7 +5,16 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
-    tools:context="com.omak.smartfees.RegisterActivity">
+    tools:context="com.omak.smartfees.SignUpActivity">
+
+    <ProgressBar
+        android:id="@+id/login_progress"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_centerInParent="true"
+        android:visibility="gone" />
 
     <ScrollView
         android:id="@+id/login_form"
@@ -18,13 +27,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
-
-            <ImageView
-                android:id="@+id/dp"
-                android:layout_width="150dp"
-                android:layout_height="150dp"
-                android:layout_gravity="center_horizontal"
-                android:src="@android:drawable/picture_frame"/>
 
             <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"
@@ -46,36 +48,7 @@
                 android:layout_height="wrap_content">
 
                 <EditText
-                    android:id="@+id/address"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="@string/prompt_address"
-                    android:inputType="textPostalAddress"
-                    android:maxLines="3" />
-
-            </android.support.design.widget.TextInputLayout>
-
-            <android.support.design.widget.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <EditText
-                    android:id="@+id/age"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="@string/prompt_age"
-                    android:inputType="number"
-                    android:maxLines="1"
-                    android:singleLine="true"/>
-
-            </android.support.design.widget.TextInputLayout>
-
-            <android.support.design.widget.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <EditText
-                    android:id="@+id/phone"
+                    android:id="@+id/mobile"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/prompt_phone"
@@ -90,11 +63,11 @@
                 android:layout_height="wrap_content">
 
                 <EditText
-                    android:id="@+id/weight"
+                    android:id="@+id/password_sign"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/prompt_weight"
-                    android:inputType="number"
+                    android:hint="@string/prompt_password"
+                    android:inputType="textPassword"
                     android:maxLines="1"
                     android:singleLine="true"/>
 
@@ -105,11 +78,11 @@
                 android:layout_height="wrap_content">
 
                 <EditText
-                    android:id="@+id/regnum"
+                    android:id="@+id/password_conf"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/prompt_regi_num"
-                    android:inputType="number"
+                    android:hint="Confirm Password"
+                    android:inputType="textVisiblePassword"
                     android:maxLines="1"
                     android:singleLine="true"/>
 
@@ -120,11 +93,41 @@
                 android:layout_height="wrap_content">
 
                 <EditText
-                    android:id="@+id/date"
+                    android:id="@+id/email_sign"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/prompt_date"
-                    android:inputType="date"
+                    android:hint="@string/prompt_email"
+                    android:inputType="textEmailAddress"
+                    android:maxLines="1"
+                    android:singleLine="true"/>
+
+            </android.support.design.widget.TextInputLayout>
+
+            <android.support.design.widget.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <EditText
+                    android:id="@+id/address_sign"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/prompt_address"
+                    android:inputType="textPostalAddress"
+                    android:maxLines="1"
+                    android:singleLine="true"/>
+
+            </android.support.design.widget.TextInputLayout>
+
+            <android.support.design.widget.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <EditText
+                    android:id="@+id/owner"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Owner's Name"
+                    android:inputType="textPersonName"
                     android:maxLines="1"
                     android:singleLine="true"/>
 
@@ -136,7 +139,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="@string/action_register"
+                android:text="Sign Up"
                 android:background="@color/Neon_Orange"
                 android:textStyle="bold" />
 

@@ -4,31 +4,14 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.support.annotation.NonNull;
+import android.os.AsyncTask;
+import android.os.Build;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.app.LoaderManager.LoaderCallbacks;
-import android.content.ContentResolver;
-import android.content.CursorLoader;
-import android.content.Loader;
-import android.database.Cursor;
-import android.net.Uri;
-import android.os.AsyncTask;
-import android.os.Build.VERSION;
-import android.os.Build;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.text.TextUtils;
-import android.view.KeyEvent;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.inputmethod.EditorInfo;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 
 import com.omak.smartfees.Global.Constants;
 import com.omak.smartfees.Global.Utils;
@@ -37,63 +20,36 @@ import com.omak.smartfees.Network.Url;
 
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.List;
+public class SignUpActivity extends AppCompatActivity {
 
-import static android.Manifest.permission.READ_CONTACTS;
-
-/**
- * A login screen that offers login via Mobile/password.
- */
-public class LoginActivity extends AppCompatActivity {
-
-    /**
-     * Keep track of the login task to ensure we can cancel it if requested.
-     */
     private UserLoginTask mAuthTask = null;
 
     // UI references.
     private EditText mNumberView;
-    private EditText mPasswordView;
+    private EditText mPasswordView,mPasswordViewCnf,mEmail,mAddress,mOwner;
+    private EditText mName;
     private View mProgressView;
     private View mLoginFormView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
-        // Set up the login form.
-        mNumberView = (EditText) findViewById(R.id.mobile_number);
-
-        mPasswordView = (EditText) findViewById(R.id.password);
-        mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-                if (id == R.id.login || id == EditorInfo.IME_NULL) {
-                    attemptLogin();
-                    return true;
-                }
-                return false;
-            }
-        });
-
-        Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
-        mEmailSignInButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                attemptLogin();
-            }
-        });
-
+        setContentView(R.layout.activity_sign_up);
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
 
-        findViewById(R.id.register_button).setOnClickListener(new OnClickListener() {
+        mName = (EditText)findViewById(R.id.name);
+        mNumberView = (EditText)findViewById(R.id.mobile);
+        mPasswordView = (EditText)findViewById(R.id.password_sign);
+        mPasswordViewCnf = (EditText)findViewById(R.id.password_conf);
+        mEmail = (EditText)findViewById(R.id.email_sign);
+        mAddress = (EditText)findViewById(R.id.address_sign);
+        mOwner = (EditText)findViewById(R.id.owner);
+
+        findViewById(R.id.register).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(LoginActivity.this,SignUpActivity.class);
-                startActivity(intent);
-
+                attemptLogin();
             }
         });
     }
@@ -111,18 +67,38 @@ public class LoginActivity extends AppCompatActivity {
         // Reset errors.
         mNumberView.setError(null);
         mPasswordView.setError(null);
+        mPasswordViewCnf.setError(null);
+        mName.setError(null);
 
         // Store values at the time of the login attempt.
+        String name = mName.getText().toString();
         String number = mNumberView.getText().toString();
         String password = mPasswordView.getText().toString();
+        String passCnf = mPasswordViewCnf.getText().toString();
+        String email = mEmail.getText().toString();
+        String address = mAddress.getText().toString();
+        String owner = mOwner.getText().toString();
+
 
         boolean cancel = false;
         View focusView = null;
 
         // Check for a valid password, if the user entered one.
-        if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
+        if (!password.equalsIgnoreCase(passCnf) ) {
+            mPasswordViewCnf.setError(getString(R.string.error_incorrect_password));
+            focusView = mPasswordViewCnf;
+            cancel = true;
+        }
+
+        if (TextUtils.isEmpty(password) || !isPasswordValid(password)) {
             mPasswordView.setError(getString(R.string.error_invalid_password));
             focusView = mPasswordView;
+            cancel = true;
+        }
+
+        if (TextUtils.isEmpty(name)) {
+            mName.setError(getString(R.string.error_field_required));
+            focusView = mName;
             cancel = true;
         }
 
@@ -141,7 +117,7 @@ public class LoginActivity extends AppCompatActivity {
             focusView.requestFocus();
         } else {
             showProgress(true);
-            mAuthTask = new UserLoginTask(number, password);
+            mAuthTask = new UserLoginTask(number,password,name,owner,email,address);
             mAuthTask.execute((Void) null);
         }
     }
@@ -198,32 +174,36 @@ public class LoginActivity extends AppCompatActivity {
 
         private final String mNumber;
         private final String mPassword;
+        private final String mName;
+        private final String mOwner;
+        private final String mEmail;
+        private final String mAddress;
         private String param;
 
-        UserLoginTask(String email, String password) {
-            mNumber = email;
+        UserLoginTask(String number, String password,String name,String owner,String email,String address) {
+            mNumber = number;
             mPassword = password;
+            mName = name;
+            mOwner = owner;
+            mEmail = email;
+            mAddress = address;
         }
 
         @Override
         public String doInBackground(Void... params) {
-            param = "gymtag=login&txtphone=" + mNumber +"&txtpass=" + mPassword;
+            param = "gymtag=signup&txtphone=" + mNumber +"&txtpass=" + mPassword
+                    +"&txtname=" + mName + "&txtmail=" + mEmail +"&txtperson=" + mOwner +"&txtaddress=" + mAddress;
             try {
                 String response = RestClient.httpPost(Url.BASE_URL, param);
                 JSONObject jsonObject = new JSONObject(response);
                 jsonObject = jsonObject.getJSONObject("response");
                 if(jsonObject.getString("status").equalsIgnoreCase("success")) {
-                    Utils.setStringSharedPreference(LoginActivity.this, Constants.SHARED_GYM_ID,jsonObject.getString("gym_id"));
-                    Utils.setStringSharedPreference(LoginActivity.this, Constants.SHARED_GYM_NAME, jsonObject.getString("gym_name"));
-                    Utils.setBooleanSharedPreference(LoginActivity.this,Constants.SHARED_PREF_IS_LOGGED_IN,true);
-                    if(jsonObject.getString("staff_type").equalsIgnoreCase("owner")) {
-                        Utils.setBooleanSharedPreference(LoginActivity.this,Constants.SHARED_PREF_IS_OWNER,true);
-                    } else {
-                        Utils.setBooleanSharedPreference(LoginActivity.this,Constants.SHARED_PREF_IS_OWNER,false);
-                    }
+                    Utils.setStringSharedPreference(SignUpActivity.this, Constants.SHARED_GYM_ID, jsonObject.getString("gym_id"));
+                    Utils.setStringSharedPreference(SignUpActivity.this, Constants.SHARED_GYM_NAME,jsonObject.getString("gym_name"));
+                    Utils.setBooleanSharedPreference(SignUpActivity.this,Constants.SHARED_PREF_IS_LOGGED_IN,true);
                     return jsonObject.getString("status");
                 } else {
-                    return jsonObject.getString("error_msg");
+                    return jsonObject.getString("status");
                 }
 
             } catch (Exception e) {
@@ -239,7 +219,7 @@ public class LoginActivity extends AppCompatActivity {
             showProgress(false);
 
             if (success.equalsIgnoreCase("success")) {
-                Intent intent = new Intent(LoginActivity.this,MainHomeActivity.class);
+                Intent intent = new Intent(SignUpActivity.this,HomeActivity.class);
                 startActivity(intent);
                 finish();
             } else {
@@ -256,4 +236,3 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 }
-
