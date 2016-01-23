@@ -90,7 +90,7 @@ public class SignUpActivity extends AppCompatActivity {
             cancel = true;
         }
 
-        if (TextUtils.isEmpty(password) || !isPasswordValid(password)) {
+        if (TextUtils.isEmpty(password) || !Utils.isPasswordValid(password)) {
             mPasswordView.setError(getString(R.string.error_invalid_password));
             focusView = mPasswordView;
             cancel = true;
@@ -107,7 +107,7 @@ public class SignUpActivity extends AppCompatActivity {
             mNumberView.setError(getString(R.string.error_field_required));
             focusView = mNumberView;
             cancel = true;
-        } else if (!isNumberValid(number)) {
+        } else if (!Utils.isNumberValid(number)) {
             mNumberView.setError(getString(R.string.error_invalid_email));
             focusView = mNumberView;
             cancel = true;
@@ -122,13 +122,7 @@ public class SignUpActivity extends AppCompatActivity {
         }
     }
 
-    private boolean isNumberValid(String number) {
-        return number.length() > 6;
-    }
 
-    private boolean isPasswordValid(String password) {
-        return password.length() > 4;
-    }
 
     /**
      * Shows the progress UI and hides the login form.

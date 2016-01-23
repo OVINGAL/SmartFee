@@ -40,6 +40,14 @@ public class Utils {
         }
     }
 
+    public static boolean isNumberValid(String number) {
+        return number.length() > 9;
+    }
+
+    public static boolean isPasswordValid(String password) {
+        return password.length() > 4;
+    }
+
     public static final boolean logOutShared(Context context) {
         SharedPreferences Preference = context.getSharedPreferences(
                 SHARED_PREF_NAME, Context.MODE_PRIVATE);
