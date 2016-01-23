@@ -123,6 +123,7 @@ public class AddStaffActivity extends AppCompatActivity implements View.OnClickL
         protected String doInBackground(String... strings) {
             param = "gymtag=addstaff&txtphone=" + strings[0] +"&txtpass=" + strings[1]
                     +"&txtname=" + strings[2]+"&gym_id=" + Utils.getStringSharedPreference(AddStaffActivity.this,Constants.SHARED_GYM_ID);
+            param = param.replace(" " ,"%20");
             try {
                 String response = RestClient.httpPost(Url.STAFF_URL, param);
                 JSONObject jsonObject = new JSONObject(response);

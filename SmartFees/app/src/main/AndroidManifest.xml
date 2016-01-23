@@ -49,6 +49,8 @@
         </activity>
         <activity android:name=".ProfileActivity" >
         </activity>
+        <activity android:name=".ContactActivity" >
+        </activity>
     </application>
 
 </manifest>

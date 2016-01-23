@@ -82,7 +82,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Confirm Password"
-                    android:inputType="textVisiblePassword"
+                    android:inputType="textPassword"
                     android:maxLines="1"
                     android:singleLine="true"/>
 
@@ -132,6 +132,17 @@
                     android:singleLine="true"/>
 
             </android.support.design.widget.TextInputLayout>
+
+            <Button
+                android:id="@+id/edit_profile"
+                style="?android:textAppearanceSmall"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Edit"
+                android:visibility="gone"
+                android:background="@color/Neon_Orange"
+                android:textStyle="bold" />
 
             <Button
                 android:id="@+id/register"

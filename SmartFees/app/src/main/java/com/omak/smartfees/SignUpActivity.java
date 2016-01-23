@@ -187,6 +187,7 @@ public class SignUpActivity extends AppCompatActivity {
         public String doInBackground(Void... params) {
             param = "gymtag=signup&txtphone=" + mNumber +"&txtpass=" + mPassword
                     +"&txtname=" + mName + "&txtmail=" + mEmail +"&txtperson=" + mOwner +"&txtaddress=" + mAddress;
+            param = param.replace(" ","%20");
             try {
                 String response = RestClient.httpPost(Url.BASE_URL, param);
                 JSONObject jsonObject = new JSONObject(response);
@@ -213,7 +214,8 @@ public class SignUpActivity extends AppCompatActivity {
             showProgress(false);
 
             if (success.equalsIgnoreCase("success")) {
-                Intent intent = new Intent(SignUpActivity.this,HomeActivity.class);
+                Intent intent = new Intent(SignUpActivity.this,MainHomeActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
                 finish();
             } else {
