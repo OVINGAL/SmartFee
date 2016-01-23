@@ -13,10 +13,9 @@
             android:id="@+id/name_staff_list"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/prompt_name"
+            android:hint="Name"
             android:inputType="textPersonName"
             android:maxLines="1"
-            android:editable="false"
             android:singleLine="true" />
 
     </android.support.design.widget.TextInputLayout>
@@ -32,7 +31,6 @@
             android:hint="@string/prompt_phone"
             android:inputType="phone"
             android:maxLines="1"
-            android:editable="false"
             android:singleLine="true"/>
 
     </android.support.design.widget.TextInputLayout>

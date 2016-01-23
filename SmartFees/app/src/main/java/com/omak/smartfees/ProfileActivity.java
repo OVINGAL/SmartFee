@@ -30,20 +30,20 @@ public class ProfileActivity extends AppCompatActivity {
         mProgressView = findViewById(R.id.login_progress);
 
         mName = (EditText)findViewById(R.id.name);
-        mName.setEnabled(false);
-        mName.setText(Utils.getStringSharedPreference(ProfileActivity.this,Constants.SHARED_GYM_NAME));
+        Utils.makeNonEditable(mName);
+        mName.setText(Utils.getStringSharedPreference(ProfileActivity.this, Constants.SHARED_GYM_NAME));
         mNumberView = (EditText)findViewById(R.id.mobile);
-        mNumberView.setEnabled(false);
+        Utils.makeNonEditable(mNumberView);
         mPasswordView = (EditText)findViewById(R.id.password_sign);
         mPasswordView.setVisibility(View.GONE);
         mPasswordViewCnf = (EditText)findViewById(R.id.password_conf);
         mPasswordViewCnf.setVisibility(View.GONE);
         mEmail = (EditText)findViewById(R.id.email_sign);
-        mEmail.setEnabled(false);
+        Utils.makeNonEditable(mEmail);
         mAddress = (EditText)findViewById(R.id.address_sign);
-        mAddress.setEnabled(false);
+        Utils.makeNonEditable(mAddress);
         mOwner = (EditText)findViewById(R.id.owner);
-        mOwner.setEnabled(false);
+        Utils.makeNonEditable(mOwner);
         Button button = (Button)findViewById(R.id.register);
         button.setText("Change Password");
         button.setOnClickListener(new View.OnClickListener() {
@@ -59,11 +59,11 @@ public class ProfileActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 buttonEdt.setText("Update");
-                mName.setEnabled(true);
-                mNumberView.setEnabled(true);
-                mEmail.setEnabled(true);
-                mAddress.setEnabled(true);
-                mOwner.setEnabled(true);
+                Utils.remakeEditable(mName);
+                Utils.remakeEditable(mNumberView);
+                Utils.remakeEditable(mEmail);
+                Utils.remakeEditable(mAddress);
+                Utils.remakeEditable(mOwner);
             }
         });
 

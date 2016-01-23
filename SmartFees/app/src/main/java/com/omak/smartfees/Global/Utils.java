@@ -11,6 +11,7 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.Settings.Secure;
+import android.widget.EditText;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -38,6 +39,20 @@ public class Utils {
         } else {
             return false;
         }
+    }
+
+    public static void makeNonEditable(EditText editText){
+        editText.setClickable(false);
+        editText.setFocusable(false);
+        editText.setCursorVisible(false);
+        editText.setFocusableInTouchMode(false);
+    }
+
+    public static void remakeEditable(EditText editText){
+        editText.setClickable(true);
+        editText.setFocusable(true);
+        editText.setCursorVisible(true);
+        editText.setFocusableInTouchMode(true);
     }
 
     public static boolean isNumberValid(String number) {

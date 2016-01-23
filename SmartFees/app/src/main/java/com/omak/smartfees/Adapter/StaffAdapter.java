@@ -124,6 +124,8 @@ public class StaffAdapter extends RecyclerView.Adapter<StaffAdapter.ViewHolder> 
     // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
+        Utils.makeNonEditable(holder.mName);
+        Utils.makeNonEditable(holder.mPhone);
         holder.mName.setText(staffArrayList.get(position).name);
         holder.mPhone.setText(staffArrayList.get(position).number);
         if(Utils.getBooleanSharedPreference(context, Constants.SHARED_PREF_IS_OWNER)) {
