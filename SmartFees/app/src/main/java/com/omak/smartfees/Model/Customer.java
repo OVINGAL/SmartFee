@@ -17,38 +17,48 @@ public class Customer {
 	
 	public String _id;
 	public static final String ID = "_id";
+
+	public String gymId;
+	public static final String GYM_ID = "gym_id";
+
+	public String memberId;
+	public static final String MEMBER_ID = "member_id";
 	
-	public String rollNo;
-	public static final String ROLL_NO = "rollNo";
+	public String regNum;
+	public static final String REG_NO = "regnumber";
 	
-	public String firstName;
-	public static final String FIRST_NAME = "firstName";
+	public String name;
+	public static final String NAME = "Name";
 	
-	public String lastName;
-	public static final String LAST_NAME = "lastName";
+	public String phone;
+	public static final String PHONE = "phone";
 	
-	public String fatherName;
-	public static final String FATHER_NAME = "fatherName";
+	public String age;
+	public static final String AGE = "age";
 	
-	public String motherName;
-	public static final String MOTHER_NAME = "motherName";
+	public String weight;
+	public static final String WEIGHT = "weight";
 	
 	public String address;
 	public static final String ADDRESS = "address";
 	
-	public String contactNumber;
-	public static final String NUMBER = "contactNumber";
-	
-	public String classDivision;
-	public static final String CLASS_DIV = "classDivision";
-	
-	public boolean attStatus = true;
-	
-	
+	public String date;
+	public static final String DATE = "date";
+
+	public String blocked;
+	public static final String BLOCKED = "blocked";
+
+	public String deleted;
+	public static final String DELETED = "deleted";
+
+	public String stored;
+	public static final String STORED = "stored";
+
 	public static final String createCustomerDb() {
 		StringBuilder createStatment = new StringBuilder("CREATE TABLE ").append(TABLE_CUSTOMER_DB).append(" (").append(ID).append(" INTEGER PRIMARY KEY AUTOINCREMENT,")
-				.append(ROLL_NO).append(" TEXT,").append(FIRST_NAME).append(" TEXT,").append(LAST_NAME).append(" TEXT,").append(FATHER_NAME).append(" TEXT,")
-				.append(MOTHER_NAME).append(" TEXT,").append(ADDRESS).append(" TEXT,").append(NUMBER).append(" TEXT,").append(CLASS_DIV).append(" TEXT").append(")");
+				.append(MEMBER_ID).append(" TEXT,").append(GYM_ID).append(" TEXT,").append(REG_NO).append(" TEXT,").append(NAME).append(" TEXT,")
+				.append(BLOCKED).append(" TEXT,").append(DELETED).append(" TEXT,").append(STORED).append(" TEXT,").append(PHONE).append(" TEXT,")
+				.append(AGE).append(" TEXT,").append(ADDRESS).append(" TEXT,").append(DATE).append(" TEXT,").append(WEIGHT).append(" TEXT").append(")");
 		return createStatment.toString();
 	}
 
@@ -56,43 +66,54 @@ public class Customer {
 
 	private static ContentValues convertToContentValues(Customer stud) {
 		ContentValues contentvalues = new ContentValues();
-		contentvalues.put(ROLL_NO, stud.rollNo);
-		contentvalues.put(FIRST_NAME, stud.firstName);
-		contentvalues.put(LAST_NAME, stud.lastName);
-		contentvalues.put(FATHER_NAME, stud.fatherName);
-		contentvalues.put(MOTHER_NAME, stud.motherName);
+		contentvalues.put(MEMBER_ID, stud.memberId);
+		contentvalues.put(GYM_ID, stud.gymId);
+		contentvalues.put(REG_NO, stud.regNum);
+		contentvalues.put(NAME, stud.name);
+		contentvalues.put(PHONE, stud.phone);
 		contentvalues.put(ADDRESS, stud.address);
-		contentvalues.put(NUMBER, stud.contactNumber);
-		contentvalues.put(CLASS_DIV, stud.classDivision);
+		contentvalues.put(AGE, stud.age);
+		contentvalues.put(DATE, stud.date);
+		contentvalues.put(WEIGHT, stud.weight);
+		contentvalues.put(BLOCKED, stud.blocked);
+		contentvalues.put(DELETED, stud.deleted);
+		contentvalues.put(STORED, stud.stored);
 		return contentvalues;
 	}
 
 	private static Customer getValueFromCursor(Cursor cursor) {
 		Customer model = new Customer();
 		model._id = cursor.getString(cursor.getColumnIndex(ID));
-		model.rollNo = cursor.getString(cursor.getColumnIndex(ROLL_NO));
-		model.firstName = cursor.getString(cursor.getColumnIndex(FIRST_NAME));
-		model.lastName = cursor.getString(cursor.getColumnIndex(LAST_NAME));
-		model.fatherName = cursor.getString(cursor.getColumnIndex(FATHER_NAME));
-		model.motherName = cursor.getString(cursor.getColumnIndex(MOTHER_NAME));
+		model.memberId = cursor.getString(cursor.getColumnIndex(MEMBER_ID));
+		model.gymId = cursor.getString(cursor.getColumnIndex(GYM_ID));
+		model.regNum = cursor.getString(cursor.getColumnIndex(REG_NO));
+		model.name = cursor.getString(cursor.getColumnIndex(NAME));
+		model.phone = cursor.getString(cursor.getColumnIndex(PHONE));
 		model.address = cursor.getString(cursor.getColumnIndex(ADDRESS));
-		model.contactNumber = cursor.getString(cursor.getColumnIndex(NUMBER));
-		model.classDivision = cursor.getString(cursor.getColumnIndex(CLASS_DIV));
+		model.age = cursor.getString(cursor.getColumnIndex(AGE));
+		model.date = cursor.getString(cursor.getColumnIndex(DATE));
+		model.weight = cursor.getString(cursor.getColumnIndex(WEIGHT));
+		model.blocked = cursor.getString(cursor.getColumnIndex(BLOCKED));
+		model.deleted = cursor.getString(cursor.getColumnIndex(DELETED));
+		model.stored = cursor.getString(cursor.getColumnIndex(STORED));
 		
 		return model;
 	}
 
-	public static final long insertStudent(Context context, Customer stud) {
+	public static final long insertMember(Context context, Customer stud) {
 		ContentValues initialvalues = convertToContentValues(stud);
 		Uri contentUri = Uri.withAppendedPath(ContentProviderDb.CONTENT_URI, TABLE_CUSTOMER_DB);
 		Uri resultUri = context.getContentResolver().insert(contentUri, initialvalues);
 		return Long.parseLong(ContentProviderDb.getPath(resultUri));
 	}
 	
-	public static ArrayList<Customer> getAllStudentList(Context context) {
+
+	
+	public static ArrayList<Customer> getAllMemberListInGym(Context context,String gym_id) {
 		ArrayList<Customer> studentList = new ArrayList<Customer>();
 		Uri contentUri = Uri.withAppendedPath(ContentProviderDb.CONTENT_URI, TABLE_CUSTOMER_DB);
-		Cursor cursor = context.getContentResolver().query(contentUri, null, null, null, null);
+		String selection = GYM_ID+ " = '" +gym_id+"'";
+		Cursor cursor = context.getContentResolver().query(contentUri, null, selection, null, NAME + " ASC");
 		if (cursor != null && cursor.getCount() > 0) {
 			cursor.moveToFirst();
 			do {
@@ -102,44 +123,14 @@ public class Customer {
 		cursor.close();
 		return studentList;
 	}
-	
-	public static ArrayList<Customer> getAllStudentListInClass(Context context,String selectedClass) {
-		ArrayList<Customer> studentList = new ArrayList<Customer>();
-		Uri contentUri = Uri.withAppendedPath(ContentProviderDb.CONTENT_URI, TABLE_CUSTOMER_DB);
-		String selection = CLASS_DIV+ " = '" +selectedClass+"'";
-		Cursor cursor = context.getContentResolver().query(contentUri, null, selection, null, FIRST_NAME + " ASC");
-		if (cursor != null && cursor.getCount() > 0) {
-			cursor.moveToFirst();
-			do {
-				studentList.add(getValueFromCursor(cursor));
-			} while (cursor.moveToNext());
-		}
-		cursor.close();
-		return studentList;
-	}
-	
-	public static ArrayList<String> getDistinctClass(Context context) {
-		ArrayList<String> distinctList = new ArrayList<String>();
-		Uri contentUri = Uri.withAppendedPath(ContentProviderDb.CONTENT_URI, TABLE_CUSTOMER_DB);
-		String[] values = new String[] { " DISTINCT " + CLASS_DIV };
-		Cursor cursor = context.getContentResolver().query(contentUri, values, null, null, null);
-		if (cursor != null && cursor.getCount() > 0) {
-			cursor.moveToFirst();
-			do {
-				distinctList.add(cursor.getString(cursor.getColumnIndex(CLASS_DIV)));
-			} while (cursor.moveToNext());
-		}
-		cursor.close();
-		return distinctList;
-	}
-	
-	public static CursorLoader getStudentListInClassCursor(Context context,String selectedClass) {
-		Uri contentUri = Uri.withAppendedPath(ContentProviderDb.CONTENT_URI, TABLE_CUSTOMER_DB);
-		String selection = CLASS_DIV+ " = '" +selectedClass+"'";
-		return new CursorLoader(context, contentUri, null, selection, null, null);
-	}
-	
-	public static Customer getStudentDetails(Context context,String id) {
+
+//	public static CursorLoader getStudentListInClassCursor(Context context,String selectedClass) {
+//		Uri contentUri = Uri.withAppendedPath(ContentProviderDb.CONTENT_URI, TABLE_CUSTOMER_DB);
+//		String selection = CLASS_DIV+ " = '" +selectedClass+"'";
+//		return new CursorLoader(context, contentUri, null, selection, null, null);
+//	}
+
+	public static Customer getMemberDetails(Context context,String id) {
 		Customer student = new Customer();
 		Uri contentUri = Uri.withAppendedPath(ContentProviderDb.CONTENT_URI, TABLE_CUSTOMER_DB);
 		String selection = ID+ " = '" +id+"'";

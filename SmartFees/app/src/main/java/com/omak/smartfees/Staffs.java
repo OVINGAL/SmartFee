@@ -18,6 +18,7 @@ import com.omak.smartfees.Global.Utils;
 import com.omak.smartfees.Model.Staff;
 import com.omak.smartfees.Network.RestClient;
 import com.omak.smartfees.Network.Url;
+import com.omak.smartfees.Parser.JsonParser;
 
 import org.json.JSONObject;
 
@@ -91,24 +92,11 @@ public class Staffs extends AppCompatActivity {
 
         @Override
         protected ArrayList<Staff> doInBackground(Void... voids) {
-            param = "gymtag=allstaff&gym_id=" + Utils.getStringSharedPreference(Staffs.this,Constants.SHARED_GYM_ID);
+            param = "gymtag=searchstaff&txtname=&txtphone=&gym_id=" + Utils.getStringSharedPreference(Staffs.this,Constants.SHARED_GYM_ID);
             ArrayList<Staff> staffs = new ArrayList<Staff>();
-            Staff s = new Staff();
-            s.name = "golbin";
-            s.number = "9564645";
-            s.password = "12345";
-            s.gym_id = "5";
-            staffs.add(s);
             try {
                 String response = RestClient.httpPost(Url.STAFF_URL, param);
-                JSONObject jsonObject = new JSONObject(response);
-                jsonObject = jsonObject.getJSONObject("response");
-                if(jsonObject.getString("status").equalsIgnoreCase("success")) {
-                    return staffs;
-                } else {
-                    return staffs;
-                }
-
+                return JsonParser.parseStaffList(response);
             } catch (Exception e) {
                 return staffs;
             }

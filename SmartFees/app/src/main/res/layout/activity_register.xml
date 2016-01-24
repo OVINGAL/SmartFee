@@ -31,10 +31,10 @@
                 android:layout_height="wrap_content">
 
                 <EditText
-                    android:id="@+id/name"
+                    android:id="@+id/name_member"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/prompt_name"
+                    android:hint="Name"
                     android:inputType="textPersonName"
                     android:maxLines="1"
                     android:singleLine="true" />
@@ -125,6 +125,8 @@
                     android:layout_height="wrap_content"
                     android:hint="@string/prompt_date"
                     android:inputType="date"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
                     android:maxLines="1"
                     android:singleLine="true"/>
 

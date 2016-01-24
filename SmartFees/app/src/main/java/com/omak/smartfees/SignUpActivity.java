@@ -116,9 +116,14 @@ public class SignUpActivity extends AppCompatActivity {
         if (cancel) {
             focusView.requestFocus();
         } else {
-            showProgress(true);
-            mAuthTask = new UserLoginTask(number,password,name,owner,email,address);
-            mAuthTask.execute((Void) null);
+            if(Utils.checkNetwork(SignUpActivity.this)) {
+                showProgress(true);
+                mAuthTask = new UserLoginTask(number, password, name, owner, email, address);
+                mAuthTask.execute((Void) null);
+            } else {
+                Snackbar.make(mNumberView, "No network connection available", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+            }
         }
     }
 
@@ -215,7 +220,7 @@ public class SignUpActivity extends AppCompatActivity {
 
             if (success.equalsIgnoreCase("success")) {
                 Intent intent = new Intent(SignUpActivity.this,MainHomeActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
                 finish();
             } else {
