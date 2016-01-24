@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/outer"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:padding="5dp"
@@ -13,7 +14,7 @@
         android:layout_height="wrap_content">
 
         <EditText
-            android:id="@+id/name_staff_list"
+            android:id="@+id/name_mlist"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Name"
@@ -28,7 +29,7 @@
         android:layout_height="wrap_content">
 
         <EditText
-            android:id="@+id/mobile_staff_list"
+            android:id="@+id/mobile_mlist"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/prompt_phone"
@@ -38,36 +39,51 @@
 
     </android.support.design.widget.TextInputLayout>
 
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/address_mlist"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Address"
+            android:inputType="textPersonName"
+            android:maxLines="1"
+            android:singleLine="true" />
+
+    </android.support.design.widget.TextInputLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/options"
         android:orientation="horizontal">
         <Button
-            android:id="@+id/update"
+            android:id="@+id/update_mlist"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
             android:background="@drawable/round"
             android:textColor="@color/colorPrimaryDark"
-            android:text="Edit"/>
+            android:text="Details"/>
         <Button
-            android:id="@+id/delete"
+            android:id="@+id/delete_mlist"
             android:layout_width="0dp"
             android:layout_weight="1"
+            android:layout_height="wrap_content"
             android:background="@drawable/round"
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"
-            android:layout_height="wrap_content"
             android:textColor="@color/colorPrimaryDark"
             android:text="Delete"/>
 
         <Button
-            android:id="@+id/block"
+            android:id="@+id/block_mlist"
             android:layout_width="0dp"
             android:layout_weight="1"
-            android:background="@drawable/round"
             android:layout_height="wrap_content"
+            android:background="@drawable/round"
             android:textColor="@color/colorPrimaryDark"
             android:text="Block"/>
     </LinearLayout>

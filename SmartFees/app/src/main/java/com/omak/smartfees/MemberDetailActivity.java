@@ -3,24 +3,21 @@ package com.omak.smartfees;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MenuItem;
-import android.webkit.WebView;
 
 import com.omak.smartfees.Global.Constants;
 import com.omak.smartfees.Global.Utils;
 
-public class ContactActivity extends AppCompatActivity {
+public class MemberDetailActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_contact);
-
+        setContentView(R.layout.activity_member_detail);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle(Utils.getStringSharedPreference(ContactActivity.this, Constants.SHARED_GYM_NAME));
+        getSupportActionBar().setTitle(Utils.getStringSharedPreference(MemberDetailActivity.this, Constants.SHARED_GYM_NAME));
 
-        WebView webView = (WebView)findViewById(R.id.web);
-        webView.loadUrl("http://oddsoftsolutions.com/#contact");
     }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

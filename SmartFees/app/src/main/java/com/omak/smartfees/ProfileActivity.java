@@ -26,6 +26,9 @@ public class ProfileActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up);
 
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle(Utils.getStringSharedPreference(ProfileActivity.this, Constants.SHARED_GYM_NAME));
+
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
 
@@ -94,6 +97,11 @@ public class ProfileActivity extends AppCompatActivity {
             finish();
             return true;
         }
+        if(item.getItemId()== android.R.id.home) {
+            finish();
+        }
         return super.onOptionsItemSelected(item);
     }
+
 }
+

@@ -7,6 +7,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 
@@ -30,12 +31,23 @@ public class AddStaffActivity extends AppCompatActivity implements View.OnClickL
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_staff);
 
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle(Utils.getStringSharedPreference(AddStaffActivity.this, Constants.SHARED_GYM_NAME));
+
         mName = (EditText)findViewById(R.id.name_staff);
         mPhone = (EditText)findViewById(R.id.mobile_staff);
         mPasswordView = (EditText)findViewById(R.id.password_staff);
         mPasswordViewCnf = (EditText)findViewById(R.id.password_conf_staff);
 
         findViewById(R.id.register_staff).setOnClickListener(this);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if(item.getItemId()== android.R.id.home) {
+            finish();
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

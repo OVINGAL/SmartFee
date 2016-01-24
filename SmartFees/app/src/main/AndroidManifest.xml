@@ -28,29 +28,48 @@
         <activity
             android:name=".LoginActivity"
             android:label="@string/title_activity_login"
-            android:windowSoftInputMode="adjustPan" />
+            android:windowSoftInputMode="stateAlwaysHidden" />
         <activity
             android:name=".HomeActivity"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="stateAlwaysHidden" />
         <activity
             android:name=".RegisterActivity"
-            android:windowSoftInputMode="adjustPan" />
+            android:windowSoftInputMode="stateAlwaysHidden" />
         <activity
             android:name=".SignUpActivity"
-            android:windowSoftInputMode="adjustPan" />
+            android:windowSoftInputMode="stateAlwaysHidden" />
         <activity
             android:name=".Staffs"
             android:label="@string/title_activity_staffs"
-            android:theme="@style/AppTheme.NoActionBar" >
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="stateAlwaysHidden" >
         </activity>
-        <activity android:name=".AddStaffActivity" >
+        <activity
+            android:name=".AddStaffActivity"
+            android:windowSoftInputMode="stateAlwaysHidden" >
         </activity>
-        <activity android:name=".MainHomeActivity" >
+        <activity
+            android:name=".MainHomeActivity"
+            android:windowSoftInputMode="stateAlwaysHidden" >
         </activity>
-        <activity android:name=".ProfileActivity" >
+        <activity
+            android:name=".ProfileActivity"
+            android:windowSoftInputMode="stateAlwaysHidden" >
         </activity>
-        <activity android:name=".ContactActivity" >
+        <activity
+            android:name=".ContactActivity"
+            android:windowSoftInputMode="stateAlwaysHidden" >
         </activity>
+        <activity
+            android:name=".MemberDetailActivity"
+            android:windowSoftInputMode="stateAlwaysHidden" >
+        </activity>
+
+        <service
+            android:name=".BackgroundService.MemberUpdateService"
+            android:exported="false" >
+        </service>
     </application>
 
 </manifest>

@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
+import com.omak.smartfees.BackgroundService.MemberUpdateService;
 import com.omak.smartfees.Global.Constants;
 import com.omak.smartfees.Global.Utils;
 
@@ -21,6 +22,9 @@ public class MainHomeActivity extends AppCompatActivity implements View.OnClickL
         findViewById(R.id.profile_btn).setOnClickListener(this);
         findViewById(R.id.share_btn).setOnClickListener(this);
         findViewById(R.id.about_btn).setOnClickListener(this);
+        if(Utils.checkNetwork(MainHomeActivity.this)){
+            MemberUpdateService.startupdateAction(MainHomeActivity.this,Utils.getStringSharedPreference(MainHomeActivity.this,Constants.SHARED_GYM_ID));
+        }
     }
 
 

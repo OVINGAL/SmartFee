@@ -10,9 +10,11 @@ import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.omak.smartfees.Global.Constants;
 import com.omak.smartfees.Global.Utils;
@@ -39,6 +41,9 @@ public class RegisterActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle(Utils.getStringSharedPreference(RegisterActivity.this, Constants.SHARED_GYM_NAME));
+
         mName = (EditText)findViewById(R.id.name_member);
         mMobile = (EditText)findViewById(R.id.phone);
         mAge = (EditText)findViewById(R.id.age);
@@ -61,6 +66,14 @@ public class RegisterActivity extends AppCompatActivity {
                 registerMember();
             }
         });
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if(item.getItemId()== android.R.id.home) {
+            finish();
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     public static class DatePickerFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener {
@@ -218,7 +231,7 @@ public class RegisterActivity extends AppCompatActivity {
                         Customer.insertMember(RegisterActivity.this, model);
                         return jsonObject.getString("status");
                     } else {
-                        return jsonObject.getString("status");
+                        return jsonObject.getString("status_msg");
                     }
 
                 } catch (Exception e) {
@@ -226,7 +239,7 @@ public class RegisterActivity extends AppCompatActivity {
                 }
             } else {
                 Customer.insertMember(RegisterActivity.this, model);
-                return "Locally saved.";
+                return "success";
             }
         }
 
@@ -236,8 +249,10 @@ public class RegisterActivity extends AppCompatActivity {
             if(dialog != null && dialog.isShowing()){
                 dialog.dismiss();
             }
-            Snackbar.make(mAddress, success, Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show();
+            Toast.makeText(RegisterActivity.this, success, Toast.LENGTH_SHORT).show();
+            if(success.equalsIgnoreCase("success")) {
+                finish();
+            }
         }
 
         @Override

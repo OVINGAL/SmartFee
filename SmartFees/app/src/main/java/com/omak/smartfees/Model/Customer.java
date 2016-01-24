@@ -18,47 +18,63 @@ public class Customer {
 	public String _id;
 	public static final String ID = "_id";
 
-	public String gymId;
+	public String gymId = "";
 	public static final String GYM_ID = "gym_id";
 
-	public String memberId;
+	public String memberId = "";
 	public static final String MEMBER_ID = "member_id";
 	
-	public String regNum;
+	public String regNum = "";
 	public static final String REG_NO = "regnumber";
 	
-	public String name;
+	public String name = "";
 	public static final String NAME = "Name";
 	
-	public String phone;
+	public String phone = "";
 	public static final String PHONE = "phone";
 	
-	public String age;
+	public String age = "";
 	public static final String AGE = "age";
 	
-	public String weight;
+	public String weight = "";
 	public static final String WEIGHT = "weight";
 	
-	public String address;
+	public String address = "";
 	public static final String ADDRESS = "address";
 	
-	public String date;
+	public String date = "";
 	public static final String DATE = "date";
 
-	public String blocked;
+	public String blocked = "";
 	public static final String BLOCKED = "blocked";
 
-	public String deleted;
+	public String deleted = "";
 	public static final String DELETED = "deleted";
 
-	public String stored;
+	public String stored = "";
 	public static final String STORED = "stored";
+
+	public Customer(){
+		gymId = "";
+		memberId = "";
+		regNum = "";
+		name = "";
+		phone = "";
+		age = "";
+		weight = "";
+		address = "";
+		date = "";
+		blocked = "No";
+		deleted = "No";
+		stored = "No";
+
+	}
 
 	public static final String createCustomerDb() {
 		StringBuilder createStatment = new StringBuilder("CREATE TABLE ").append(TABLE_CUSTOMER_DB).append(" (").append(ID).append(" INTEGER PRIMARY KEY AUTOINCREMENT,")
 				.append(MEMBER_ID).append(" TEXT,").append(GYM_ID).append(" TEXT,").append(REG_NO).append(" TEXT,").append(NAME).append(" TEXT,")
 				.append(BLOCKED).append(" TEXT,").append(DELETED).append(" TEXT,").append(STORED).append(" TEXT,").append(PHONE).append(" TEXT,")
-				.append(AGE).append(" TEXT,").append(ADDRESS).append(" TEXT,").append(DATE).append(" TEXT,").append(WEIGHT).append(" TEXT").append(")");
+				.append(AGE).append(" TEXT,").append(ADDRESS).append(" TEXT,").append(DATE).append(" TEXT,").append(WEIGHT).append(" TEXT,").append("unique (regnumber))");
 		return createStatment.toString();
 	}
 
@@ -75,9 +91,9 @@ public class Customer {
 		contentvalues.put(AGE, stud.age);
 		contentvalues.put(DATE, stud.date);
 		contentvalues.put(WEIGHT, stud.weight);
-		contentvalues.put(BLOCKED, stud.blocked);
-		contentvalues.put(DELETED, stud.deleted);
-		contentvalues.put(STORED, stud.stored);
+		contentvalues.put(BLOCKED, stud.blocked.toLowerCase());
+		contentvalues.put(DELETED, stud.deleted.toLowerCase());
+		contentvalues.put(STORED, stud.stored.toLowerCase());
 		return contentvalues;
 	}
 
@@ -112,7 +128,22 @@ public class Customer {
 	public static ArrayList<Customer> getAllMemberListInGym(Context context,String gym_id) {
 		ArrayList<Customer> studentList = new ArrayList<Customer>();
 		Uri contentUri = Uri.withAppendedPath(ContentProviderDb.CONTENT_URI, TABLE_CUSTOMER_DB);
-		String selection = GYM_ID+ " = '" +gym_id+"'";
+		String selection = GYM_ID+ " = '" +gym_id+"' AND " + DELETED + " != 'yes'";
+		Cursor cursor = context.getContentResolver().query(contentUri, null, selection, null, NAME + " ASC");
+		if (cursor != null && cursor.getCount() > 0) {
+			cursor.moveToFirst();
+			do {
+				studentList.add(getValueFromCursor(cursor));
+			} while (cursor.moveToNext());
+		}
+		cursor.close();
+		return studentList;
+	}
+
+	public static ArrayList<Customer> getAllMemberListInGymNotInsterted(Context context,String gym_id) {
+		ArrayList<Customer> studentList = new ArrayList<Customer>();
+		Uri contentUri = Uri.withAppendedPath(ContentProviderDb.CONTENT_URI, TABLE_CUSTOMER_DB);
+		String selection = GYM_ID+ " = '" +gym_id+"' AND " + MEMBER_ID + " = ''";
 		Cursor cursor = context.getContentResolver().query(contentUri, null, selection, null, NAME + " ASC");
 		if (cursor != null && cursor.getCount() > 0) {
 			cursor.moveToFirst();
@@ -150,9 +181,9 @@ public class Customer {
 		return resultUri;
 	}
 	
-	public static int deleteStudent(Context context,Customer s) {
+	public static int deleteCustomer(Context context,String id) {
 		Uri contentUri = Uri.withAppendedPath(ContentProviderDb.CONTENT_URI, TABLE_CUSTOMER_DB);
-		int resultUri = context.getContentResolver().delete(contentUri, ID+"=?", new String[] {s._id});
+		int resultUri = context.getContentResolver().delete(contentUri, ID+"=?", new String[] {id});
 		return resultUri;
 	}
 

@@ -19,7 +19,7 @@
     <string name="prompt_name">Company Name</string>
     <string name="prompt_address">Address</string>
     <string name="prompt_age">Age</string>
-    <string name="prompt_phone">Mobile</string>
+    <string name="prompt_phone">Phone</string>
     <string name="prompt_weight">Weight</string>
     <string name="prompt_regi_num">Registration Number</string>
     <string name="prompt_date">Date</string>

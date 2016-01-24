@@ -3,6 +3,7 @@ package com.omak.smartfees.Adapter;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
@@ -15,6 +16,8 @@ import android.widget.Toast;
 
 import com.omak.smartfees.Global.Constants;
 import com.omak.smartfees.Global.Utils;
+import com.omak.smartfees.MemberDetailActivity;
+import com.omak.smartfees.Model.Customer;
 import com.omak.smartfees.Model.Staff;
 import com.omak.smartfees.Network.RestClient;
 import com.omak.smartfees.Network.Url;
@@ -29,12 +32,12 @@ import java.util.ArrayList;
  */
 public class MemberAdapter extends RecyclerView.Adapter<MemberAdapter.ViewHolder> {
     Context context;
-    private ArrayList<Staff> staffArrayList;
+    private ArrayList<Customer> memberArrayList;
     private int lastPosition = -1;
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public MemberAdapter(ArrayList<Staff> staffs, Context mContext) {
-        this.staffArrayList = staffs;
+    public MemberAdapter(ArrayList<Customer> customers, Context mContext) {
+        this.memberArrayList = customers;
         this.context = mContext;
     }
 
@@ -44,32 +47,42 @@ public class MemberAdapter extends RecyclerView.Adapter<MemberAdapter.ViewHolder
                                                         int viewType) {
         // create a new view
         View v = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.staff_cell, parent, false);
+                .inflate(R.layout.member_cell, parent, false);
         // set the view's size, margins, paddings and layout parameters
 
         ViewHolder vh = new ViewHolder(v, new ViewHolder.IMyViewHolderClicks() {
             @Override
             public void onItemClick(View view, final int pos) {
                 switch (view.getId()){
-                    case R.id.update:
+                    case R.id.update_mlist:
+                    case R.id.outer:
+                        Intent intent = new Intent(context, MemberDetailActivity.class);
+                        context.startActivity(intent);
                         break;
-                    case R.id.delete:
-                        String title = "Delete " + staffArrayList.get(pos).name + " ?";
+                    case R.id.delete_mlist:
+                        String title = "Delete " + memberArrayList.get(pos).name + " ?";
                         final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
                         alertDialogBuilder.setMessage(title);
                         alertDialogBuilder.setCancelable(false);
                         alertDialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
-                                if(Utils.checkNetwork(context)){
-                                    DeleteStaffAsync deleteStaffAsync = new DeleteStaffAsync(context,staffArrayList.get(pos).staffId);
+                                if(Utils.checkNetwork(context) && memberArrayList.get(pos).memberId.length() > 0){
+                                    DeleteStaffAsync deleteStaffAsync = new DeleteStaffAsync(context,memberArrayList.get(pos).memberId);
                                     deleteStaffAsync.execute("");
-                                    staffArrayList.remove(pos);
-                                    notifyDataSetChanged();
+                                    Customer.deleteCustomer(context, memberArrayList.get(pos)._id);
                                 } else {
-                                    Toast.makeText(context,"No network connection available",Toast.LENGTH_SHORT).show();
+                                    Customer s = memberArrayList.get(pos);
+                                    s.deleted = "Yes";
+                                    s.stored = "No";
+                                    if(s.memberId.length() > 0){
+                                        Customer.deleteCustomer(context, s._id);
+                                    } else {
+                                        Customer.updateDetails(context, s);
+                                    }
                                 }
-
+                                memberArrayList.remove(pos);
+                                notifyDataSetChanged();
                             }
                         });
                         alertDialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -81,25 +94,28 @@ public class MemberAdapter extends RecyclerView.Adapter<MemberAdapter.ViewHolder
                         AlertDialog dialog = alertDialogBuilder.create();
                         dialog.show();
                         break;
-                    case R.id.block:
+                    case R.id.block_mlist:
                         final AlertDialog.Builder alertDialogBuilder2 = new AlertDialog.Builder(context);
-                        String title2 = "Activate " + staffArrayList.get(pos).name + " ?";
-                        if(staffArrayList.get(pos).isActive) {
-                            title2 = "Block " + staffArrayList.get(pos).name + " ?";
+                        String title2 = "Activate " + memberArrayList.get(pos).name + " ?";
+                        if(memberArrayList.get(pos).blocked.equalsIgnoreCase("NO")) {
+                            title2 = "Block " + memberArrayList.get(pos).name + " ?";
                         }
                         alertDialogBuilder2.setMessage(title2);
                         alertDialogBuilder2.setCancelable(false);
                         alertDialogBuilder2.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
-                                if(Utils.checkNetwork(context)){
-                                    BlockStaffAsync blockStaffAsync = new BlockStaffAsync(context,staffArrayList.get(pos).staffId,staffArrayList.get(pos).isActive);
+                                if(Utils.checkNetwork(context) && memberArrayList.get(pos).memberId.length() > 0){
+                                    BlockStaffAsync blockStaffAsync =
+                                            new BlockStaffAsync(context,memberArrayList.get(pos).memberId,memberArrayList.get(pos).blocked.equalsIgnoreCase("No"));
                                     blockStaffAsync.execute("");
-                                    staffArrayList.get(pos).isActive = !staffArrayList.get(pos).isActive;
-                                    notifyDataSetChanged();
+                                    memberArrayList.get(pos).stored = "Yes";
                                 } else {
-                                    Toast.makeText(context,"No network connection available",Toast.LENGTH_SHORT).show();
+                                    memberArrayList.get(pos).stored = "No";
                                 }
+                                memberArrayList.get(pos).blocked = memberArrayList.get(pos).blocked.equalsIgnoreCase("No") ? "Yes" : "No";
+                                Customer.updateDetails(context,memberArrayList.get(pos));
+                                notifyDataSetChanged();
                             }
                         });
                         alertDialogBuilder2.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -122,14 +138,12 @@ public class MemberAdapter extends RecyclerView.Adapter<MemberAdapter.ViewHolder
     public void onBindViewHolder(ViewHolder holder, int position) {
         Utils.makeNonEditable(holder.mName);
         Utils.makeNonEditable(holder.mPhone);
-        holder.mName.setText(staffArrayList.get(position).name);
-        holder.mPhone.setText(staffArrayList.get(position).number);
-        if(Utils.getBooleanSharedPreference(context, Constants.SHARED_PREF_IS_OWNER)) {
-            holder.layout.setVisibility(View.VISIBLE);
-        } else {
-            holder.layout.setVisibility(View.GONE);
-        }
-        if(staffArrayList.get(position).isActive){
+        Utils.makeNonEditable(holder.mAddress);
+        holder.mName.setText(memberArrayList.get(position).name);
+        holder.mPhone.setText(memberArrayList.get(position).phone);
+        holder.mAddress.setText(memberArrayList.get(position).address);
+
+        if(memberArrayList.get(position).blocked.equalsIgnoreCase("NO")){
             holder.mBlock.setText("Block");
         }else {
             holder.mBlock.setText("Activate");
@@ -139,7 +153,7 @@ public class MemberAdapter extends RecyclerView.Adapter<MemberAdapter.ViewHolder
     // Return the size of your dataset (invoked by the layout manager)
     @Override
     public int getItemCount() {
-        return staffArrayList.size();
+        return memberArrayList.size();
     }
 
     // Provide a reference to the views for each data item
@@ -147,7 +161,7 @@ public class MemberAdapter extends RecyclerView.Adapter<MemberAdapter.ViewHolder
     // you provide access to all the views for a data item in a view holder
     public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        public EditText mName,mPhone;
+        public EditText mName,mPhone,mAddress;
         public Button mUpdate,mDelete,mBlock;
         public View layout;
 
@@ -156,13 +170,15 @@ public class MemberAdapter extends RecyclerView.Adapter<MemberAdapter.ViewHolder
         public ViewHolder(View v, IMyViewHolderClicks listener) {
             super(v);
             mListener = listener;
-            mName = (EditText) v.findViewById(R.id.name_staff_list);
-            mPhone = (EditText) v.findViewById(R.id.mobile_staff_list);
-            mUpdate = (Button) v.findViewById(R.id.update);
-            mDelete = (Button) v.findViewById(R.id.delete);
-            mBlock = (Button) v.findViewById(R.id.block);
-            layout = v.findViewById(R.id.options);
+            mName = (EditText) v.findViewById(R.id.name_mlist);
+            mPhone = (EditText) v.findViewById(R.id.mobile_mlist);
+            mAddress = (EditText) v.findViewById(R.id.address_mlist);
+            mUpdate = (Button) v.findViewById(R.id.update_mlist);
+            mDelete = (Button) v.findViewById(R.id.delete_mlist);
+            mBlock = (Button) v.findViewById(R.id.block_mlist);
+            layout = v.findViewById(R.id.outer);
 
+            layout.setOnClickListener(this);
             mUpdate.setOnClickListener(this);
             mDelete.setOnClickListener(this);
             mBlock.setOnClickListener(this);
@@ -202,7 +218,7 @@ public class MemberAdapter extends RecyclerView.Adapter<MemberAdapter.ViewHolder
 
         @Override
         protected String doInBackground(String... strings) {
-            param = "gymtag=deletestaff&staff_id=" + id +"&gym_id=" + Utils.getStringSharedPreference(context,Constants.SHARED_GYM_ID);
+            param = "gymtag=deletemember&mem_id=" + id +"&gym_id=" + Utils.getStringSharedPreference(context,Constants.SHARED_GYM_ID);
             try {
                 String response = RestClient.httpPost(Url.STAFF_URL, param);
                 JSONObject jsonObject = new JSONObject(response);
@@ -251,11 +267,11 @@ public class MemberAdapter extends RecyclerView.Adapter<MemberAdapter.ViewHolder
 
         @Override
         protected String doInBackground(String... strings) {
-            String tag = "activatestaff";
+            String tag = "activatemember";
             if(toblock){
-                tag = "blockstaff";
+                tag = "blockmember";
             }
-            param = "gymtag="+tag+"&staff_id=" + id +"&gym_id=" + Utils.getStringSharedPreference(context,Constants.SHARED_GYM_ID);
+            param = "gymtag="+tag+"&mem_id=" + id +"&gym_id=" + Utils.getStringSharedPreference(context,Constants.SHARED_GYM_ID);
             try {
                 String response = RestClient.httpPost(Url.STAFF_URL, param);
                 JSONObject jsonObject = new JSONObject(response);

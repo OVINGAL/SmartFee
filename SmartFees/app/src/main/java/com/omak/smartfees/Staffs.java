@@ -10,7 +10,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 
 import com.omak.smartfees.Adapter.StaffAdapter;
 import com.omak.smartfees.Global.Constants;
@@ -32,7 +34,8 @@ public class Staffs extends AppCompatActivity {
     private FetchStaffAsync mFetchStaff;
     private ProgressDialog dialog;
     private StaffAdapter adapter;
-
+    EditText searchEdt;
+    String searchTxt = "";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,9 +43,22 @@ public class Staffs extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle(Utils.getStringSharedPreference(Staffs.this, Constants.SHARED_GYM_NAME));
+
         mRecyclerView = (RecyclerView)findViewById(R.id.staff_list);
         mLayoutManager = new LinearLayoutManager(Staffs.this);
         mRecyclerView.setLayoutManager(mLayoutManager);
+
+        searchEdt = (EditText)findViewById(R.id.search_txt);
+        findViewById(R.id.search_btn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                searchTxt = searchEdt.getText().toString();
+                mFetchStaff = new FetchStaffAsync();
+                mFetchStaff.execute();
+            }
+        });
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         if(Utils.getBooleanSharedPreference(Staffs.this, Constants.SHARED_PREF_IS_OWNER)){
@@ -58,6 +74,14 @@ public class Staffs extends AppCompatActivity {
             }
         });
 
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if(item.getItemId()== android.R.id.home) {
+            finish();
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -92,7 +116,7 @@ public class Staffs extends AppCompatActivity {
 
         @Override
         protected ArrayList<Staff> doInBackground(Void... voids) {
-            param = "gymtag=searchstaff&txtname=&txtphone=&gym_id=" + Utils.getStringSharedPreference(Staffs.this,Constants.SHARED_GYM_ID);
+            param = "gymtag=searchstaff&txtname=" + searchTxt +"&txtphone=&gym_id=" + Utils.getStringSharedPreference(Staffs.this,Constants.SHARED_GYM_ID);
             ArrayList<Staff> staffs = new ArrayList<Staff>();
             try {
                 String response = RestClient.httpPost(Url.STAFF_URL, param);
