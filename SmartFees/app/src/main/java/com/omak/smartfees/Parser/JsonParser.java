@@ -36,14 +36,34 @@ public class JsonParser {
     public static ArrayList<Customer> parseMemberList(String response) throws JSONException{
         ArrayList<Customer> customers = new ArrayList<Customer>();
         JSONObject jsonObject = new JSONObject(response);
-        if(jsonObject.has("searchresult") && jsonObject.get("searchresult") instanceof JSONArray) {
-            JSONArray result = jsonObject.getJSONArray("searchresult");
+        if(jsonObject.has("searchinserted") && jsonObject.get("searchinserted") instanceof JSONArray) {
+            JSONArray result = jsonObject.getJSONArray("searchinserted");
             for (int i = 0; i < result.length(); i++){
                 Customer s = new Customer();
                 JSONObject staffJson = result.getJSONObject(i);
                 s.memberId = staffJson.getString("mem_id");
                 s.regNum = staffJson.getString("mem_regno");
                 s.name = staffJson.getString("mem_name");
+                s.age = staffJson.getString("mem_dob");
+                s.weight = staffJson.getString("mem_weight");
+                s.address = staffJson.getString("mem_address");
+                s.phone = staffJson.getString("mem_phone");
+                s.date = staffJson.getString("mem_joindate");
+                s.blocked = staffJson.getString("mem_status").equalsIgnoreCase("1") ? "No" : "Yes";
+                customers.add(s);
+            }
+        }
+        if(jsonObject.has("searchupdated") && jsonObject.get("searchupdated") instanceof JSONArray) {
+            JSONArray result = jsonObject.getJSONArray("searchupdated");
+            for (int i = 0; i < result.length(); i++){
+                Customer s = new Customer();
+                JSONObject staffJson = result.getJSONObject(i);
+                s.memberId = staffJson.getString("mem_id");
+                s.regNum = staffJson.getString("mem_regno");
+                s.name = staffJson.getString("mem_name");
+                s.age = staffJson.getString("mem_dob");
+                s.weight = staffJson.getString("mem_weight");
+                s.address = staffJson.getString("mem_address");
                 s.phone = staffJson.getString("mem_phone");
                 s.date = staffJson.getString("mem_joindate");
                 s.blocked = staffJson.getString("mem_status").equalsIgnoreCase("1") ? "No" : "Yes";

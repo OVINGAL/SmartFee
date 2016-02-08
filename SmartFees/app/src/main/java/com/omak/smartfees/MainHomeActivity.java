@@ -22,6 +22,7 @@ public class MainHomeActivity extends AppCompatActivity implements View.OnClickL
         findViewById(R.id.profile_btn).setOnClickListener(this);
         findViewById(R.id.share_btn).setOnClickListener(this);
         findViewById(R.id.about_btn).setOnClickListener(this);
+        findViewById(R.id.pay_fees).setOnClickListener(this);
         if(Utils.checkNetwork(MainHomeActivity.this)){
             MemberUpdateService.startupdateAction(MainHomeActivity.this,Utils.getStringSharedPreference(MainHomeActivity.this,Constants.SHARED_GYM_ID));
         }
@@ -53,6 +54,10 @@ public class MainHomeActivity extends AppCompatActivity implements View.OnClickL
                 break;
             case R.id.about_btn:
                 intent = new Intent(MainHomeActivity.this,ContactActivity.class);
+                startActivity(intent);
+                break;
+            case R.id.pay_fees:
+                intent = new Intent(MainHomeActivity.this,PayFeeActivity.class);
                 startActivity(intent);
                 break;
         }

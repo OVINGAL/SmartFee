@@ -54,6 +54,9 @@ public class Customer {
 	public String stored = "";
 	public static final String STORED = "stored";
 
+	public String photo = "";
+	public static final String PHOTO = "photo";
+
 	public Customer(){
 		gymId = "";
 		memberId = "";
@@ -64,6 +67,7 @@ public class Customer {
 		weight = "";
 		address = "";
 		date = "";
+		photo = "";
 		blocked = "No";
 		deleted = "No";
 		stored = "No";
@@ -72,7 +76,7 @@ public class Customer {
 
 	public static final String createCustomerDb() {
 		StringBuilder createStatment = new StringBuilder("CREATE TABLE ").append(TABLE_CUSTOMER_DB).append(" (").append(ID).append(" INTEGER PRIMARY KEY AUTOINCREMENT,")
-				.append(MEMBER_ID).append(" TEXT,").append(GYM_ID).append(" TEXT,").append(REG_NO).append(" TEXT,").append(NAME).append(" TEXT,")
+				.append(MEMBER_ID).append(" TEXT,").append(GYM_ID).append(" TEXT,").append(REG_NO).append(" TEXT,").append(NAME).append(" TEXT,").append(PHOTO).append(" TEXT,")
 				.append(BLOCKED).append(" TEXT,").append(DELETED).append(" TEXT,").append(STORED).append(" TEXT,").append(PHONE).append(" TEXT,")
 				.append(AGE).append(" TEXT,").append(ADDRESS).append(" TEXT,").append(DATE).append(" TEXT,").append(WEIGHT).append(" TEXT,").append("unique (regnumber))");
 		return createStatment.toString();
@@ -88,6 +92,7 @@ public class Customer {
 		contentvalues.put(NAME, stud.name);
 		contentvalues.put(PHONE, stud.phone);
 		contentvalues.put(ADDRESS, stud.address);
+		contentvalues.put(PHOTO, stud.photo);
 		contentvalues.put(AGE, stud.age);
 		contentvalues.put(DATE, stud.date);
 		contentvalues.put(WEIGHT, stud.weight);
@@ -106,6 +111,7 @@ public class Customer {
 		model.name = cursor.getString(cursor.getColumnIndex(NAME));
 		model.phone = cursor.getString(cursor.getColumnIndex(PHONE));
 		model.address = cursor.getString(cursor.getColumnIndex(ADDRESS));
+		model.photo = cursor.getString(cursor.getColumnIndex(PHOTO));
 		model.age = cursor.getString(cursor.getColumnIndex(AGE));
 		model.date = cursor.getString(cursor.getColumnIndex(DATE));
 		model.weight = cursor.getString(cursor.getColumnIndex(WEIGHT));

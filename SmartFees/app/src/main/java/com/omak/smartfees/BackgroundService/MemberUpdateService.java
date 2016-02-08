@@ -15,7 +15,11 @@ import com.omak.smartfees.Parser.JsonParser;
 
 import org.json.JSONObject;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -69,10 +73,17 @@ public class MemberUpdateService extends IntentService {
                 }
             }
             if(Utils.checkNetwork(this)) {
-                String param = "gymtag=searchmember&gym_id=" + id;
+                String callTime = Utils.getStringSharedPreference(getApplicationContext(), "LastUpdatedTime");
+                if(callTime.length() < 2) {
+                    callTime = "0";
+                }
+                String param = "gymtag=searchmember&gym_id=" + id+"&lastcalltime=" + callTime;
+                param = param.replace(" ", "%20");
+                Logger.e("params     " + param);
                 ArrayList<Customer> members = new ArrayList<Customer>();
                 try {
                     String response = RestClient.httpPost(Url.MEMBER_URL, param);
+                    Logger.e(response);
                     members = JsonParser.parseMemberList(response);
                     for (Customer model : members) {
                         model.gymId = id;
@@ -80,6 +91,10 @@ public class MemberUpdateService extends IntentService {
                             Customer.updateDetails(this,model);
                         }
                     }
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+                    String time = dateFormat.format(new Date());
+                    Utils.setStringSharedPreference(getApplicationContext(),"LastUpdatedTime",time);
+                    Logger.e(time);
                 } catch (Exception e) {
                 }
             }

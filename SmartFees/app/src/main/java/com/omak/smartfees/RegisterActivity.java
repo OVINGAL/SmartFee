@@ -58,6 +58,7 @@ public class RegisterActivity extends AppCompatActivity {
     private String filePath,filename,encodedString = null;
     private ProgressDialog dialog;
     private Bitmap bitmap;
+    private String memID;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -333,7 +334,10 @@ public class RegisterActivity extends AppCompatActivity {
                     jsonObject = jsonObject.getJSONObject("response");
                     if (jsonObject.getString("status").equalsIgnoreCase("success")) {
                         model.stored = "yes";
+                        model.memberId = jsonObject.getString("mem_id");
+                        memID = model.memberId;
                         Customer.insertMember(RegisterActivity.this, model);
+//                        upload();
                         return jsonObject.getString("status");
                     } else {
                         return jsonObject.getString("status_msg");
@@ -355,9 +359,7 @@ public class RegisterActivity extends AppCompatActivity {
                 dialog.dismiss();
             }
             Toast.makeText(RegisterActivity.this, success, Toast.LENGTH_SHORT).show();
-            if(success.equalsIgnoreCase("success")) {
-                finish();
-            }
+
         }
 
         @Override
@@ -382,23 +384,15 @@ public class RegisterActivity extends AppCompatActivity {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            try {
             BitmapFactory.Options options = null;
             options = new BitmapFactory.Options();
-            options.inSampleSize = 3;
             bitmap = BitmapFactory.decodeFile(filePath, options);
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
             // Must compress the Image to reduce image size to make upload easy
-            bitmap.compress(Bitmap.CompressFormat.PNG, 50, stream);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
             byte[] byte_arr = stream.toByteArray();
             // Encode Image to String
-            encodedString = Base64.encodeToString(byte_arr, 0);
-            upload();
-            } catch (IOException e){
-
-            } catch (JSONException e){
-
-            }
+            encodedString = Base64.encodeToString(byte_arr, Base64.DEFAULT);
             return null;
         }
 
@@ -458,17 +452,20 @@ public class RegisterActivity extends AppCompatActivity {
 //    }
 
     private void upload() throws IOException,JSONException {
-        JSONObject object = new JSONObject();
-        object.put("image",encodedString);
-        object.put("filename",filename);
-        URL url = new URL("http://gymapp.oddsoftsolutions.com/gym_photo.php");
+        String object = new String();
+        object = "image=" + encodedString ;
+        Logger.e(filename);
+        String gym_id = Utils.getStringSharedPreference(RegisterActivity.this, Constants.SHARED_GYM_ID);
+        URL url = new URL("http://gymapp.oddsoftsolutions.com/gym_member.php?gymtag=addphoto&mem_id=" + memID +
+                "&gym_id=" + gym_id +"&staff_id=2&staff_type=staff&filename=" + filename);
         HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
         httpURLConnection.setRequestMethod("POST");
         httpURLConnection.setDoOutput(true);
         httpURLConnection.setChunkedStreamingMode(1024);
 
-        httpURLConnection.setRequestProperty("Content-Type", "application/json");
-        httpURLConnection.setRequestProperty("Accept", "application/json");
+        httpURLConnection.setRequestProperty("Content-Type", "bitmap;charset=utf-8");
+        httpURLConnection.setRequestProperty("Connection", "Keep-Alive");
+        httpURLConnection.setRequestProperty("Transfer-Encoding", "chunked");
 
         OutputStream outStream = httpURLConnection.getOutputStream();
         if (outStream != null) {
@@ -482,7 +479,14 @@ public class RegisterActivity extends AppCompatActivity {
         }
         httpURLConnection.connect();
         int response = httpURLConnection.getResponseCode();
-        InputStream is = httpURLConnection.getInputStream();
+        Logger.e(" Code  " + response);
+        InputStream is;
+        if(response > 400) {
+            is = httpURLConnection.getErrorStream();
+        }
+        else {
+            is = httpURLConnection.getInputStream();
+        }
         String contentAsString = RestClient.readIt(is);
         Logger.e("The response is: " + response + "  " + contentAsString);
     }
