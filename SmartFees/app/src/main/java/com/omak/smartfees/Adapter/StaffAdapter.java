@@ -3,6 +3,7 @@ package com.omak.smartfees.Adapter;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
@@ -17,6 +18,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.omak.smartfees.AddStaffActivity;
 import com.omak.smartfees.Global.Constants;
 import com.omak.smartfees.Global.Utils;
 import com.omak.smartfees.Model.Staff;
@@ -56,6 +58,9 @@ public class StaffAdapter extends RecyclerView.Adapter<StaffAdapter.ViewHolder> 
             public void onItemClick(View view, final int pos) {
                 switch (view.getId()){
                     case R.id.update:
+                        Intent staffupdate = new Intent(context, AddStaffActivity.class);
+                        staffupdate.putExtra("Staff",staffArrayList.get(pos));
+                        context.startActivity(staffupdate);
                         break;
                     case R.id.delete:
                         String title = "Delete " + staffArrayList.get(pos).name + " ?";

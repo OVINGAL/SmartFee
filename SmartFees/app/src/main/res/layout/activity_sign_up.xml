@@ -140,6 +140,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:text="Edit"
+                android:textColor="@color/white"
                 android:visibility="gone"
                 android:background="@color/Neon_Orange"
                 android:textStyle="bold" />
@@ -151,6 +152,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:text="Sign Up"
+                android:textColor="@color/white"
                 android:background="@color/Neon_Orange"
                 android:textStyle="bold" />
 

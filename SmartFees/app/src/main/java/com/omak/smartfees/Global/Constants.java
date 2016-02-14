@@ -13,5 +13,11 @@ public class Constants {
 
     public final static String SHARED_GYM_NAME = "Gym Name";
 
+    public final static String SHARED_STAFF_ID = "Staff Id";
+
+    public final static String SHARED_STAFF_TYPE = "Staff_Type";
+
+    public final static String SHARED_GYM_STATUS = "Gym Status";
+
 
 }

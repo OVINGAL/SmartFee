@@ -60,13 +60,22 @@
         android:id="@+id/options"
         android:orientation="horizontal">
         <Button
+            android:id="@+id/details"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:background="@drawable/round"
+            android:layout_marginRight="5dp"
+            android:textColor="@color/colorPrimaryDark"
+            android:text="Details"/>
+        <Button
             android:id="@+id/update_mlist"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
             android:background="@drawable/round"
             android:textColor="@color/colorPrimaryDark"
-            android:text="Details"/>
+            android:text="Edit"/>
         <Button
             android:id="@+id/delete_mlist"
             android:layout_width="0dp"

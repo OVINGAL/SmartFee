@@ -22,6 +22,7 @@ import com.omak.smartfees.Model.Staff;
 import com.omak.smartfees.Network.RestClient;
 import com.omak.smartfees.Network.Url;
 import com.omak.smartfees.R;
+import com.omak.smartfees.RegisterActivity;
 
 import org.json.JSONObject;
 
@@ -55,8 +56,13 @@ public class MemberAdapter extends RecyclerView.Adapter<MemberAdapter.ViewHolder
             public void onItemClick(View view, final int pos) {
                 switch (view.getId()){
                     case R.id.update_mlist:
-                    case R.id.outer:
+                        Intent memberUpdate = new Intent(context, RegisterActivity.class);
+                        memberUpdate.putExtra("Member", memberArrayList.get(pos));
+                        context.startActivity(memberUpdate);
+                        break;
+                    case R.id.details:
                         Intent intent = new Intent(context, MemberDetailActivity.class);
+                        intent.putExtra("Member",memberArrayList.get(pos));
                         context.startActivity(intent);
                         break;
                     case R.id.delete_mlist:
@@ -70,13 +76,13 @@ public class MemberAdapter extends RecyclerView.Adapter<MemberAdapter.ViewHolder
                                 if(Utils.checkNetwork(context) && memberArrayList.get(pos).memberId.length() > 0){
                                     DeleteStaffAsync deleteStaffAsync = new DeleteStaffAsync(context,memberArrayList.get(pos).memberId);
                                     deleteStaffAsync.execute("");
-                                    Customer.deleteCustomer(context, memberArrayList.get(pos)._id);
+                                    Customer.deleteCustomer(context, memberArrayList.get(pos).regNum);
                                 } else {
                                     Customer s = memberArrayList.get(pos);
                                     s.deleted = "Yes";
                                     s.stored = "No";
                                     if(s.memberId.length() > 0){
-                                        Customer.deleteCustomer(context, s._id);
+                                        Customer.deleteCustomer(context, s.regNum);
                                     } else {
                                         Customer.updateDetails(context, s);
                                     }
@@ -162,7 +168,7 @@ public class MemberAdapter extends RecyclerView.Adapter<MemberAdapter.ViewHolder
     public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         public EditText mName,mPhone,mAddress;
-        public Button mUpdate,mDelete,mBlock;
+        public Button mUpdate,mDelete,mBlock,mDetails;
         public View layout;
 
         public IMyViewHolderClicks mListener;
@@ -176,13 +182,14 @@ public class MemberAdapter extends RecyclerView.Adapter<MemberAdapter.ViewHolder
             mUpdate = (Button) v.findViewById(R.id.update_mlist);
             mDelete = (Button) v.findViewById(R.id.delete_mlist);
             mBlock = (Button) v.findViewById(R.id.block_mlist);
+            mDetails = (Button) v.findViewById(R.id.details);
             layout = v.findViewById(R.id.outer);
 
             layout.setOnClickListener(this);
             mUpdate.setOnClickListener(this);
             mDelete.setOnClickListener(this);
             mBlock.setOnClickListener(this);
-
+            mDetails.setOnClickListener(this);
         }
 
         @Override

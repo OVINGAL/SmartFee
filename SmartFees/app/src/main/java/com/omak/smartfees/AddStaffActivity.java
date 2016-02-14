@@ -9,10 +9,12 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 
 import com.omak.smartfees.Global.Constants;
 import com.omak.smartfees.Global.Utils;
+import com.omak.smartfees.Model.Staff;
 import com.omak.smartfees.Network.RestClient;
 import com.omak.smartfees.Network.Url;
 
@@ -26,6 +28,8 @@ public class AddStaffActivity extends AppCompatActivity implements View.OnClickL
     private EditText mPasswordView,mPasswordViewCnf,mPhone;
     private EditText mName;
     private ProgressDialog dialog;
+    private Staff staff;
+    private boolean isUpdate = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,10 +38,22 @@ public class AddStaffActivity extends AppCompatActivity implements View.OnClickL
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(Utils.getStringSharedPreference(AddStaffActivity.this, Constants.SHARED_GYM_NAME));
 
+
+
         mName = (EditText)findViewById(R.id.name_staff);
         mPhone = (EditText)findViewById(R.id.mobile_staff);
         mPasswordView = (EditText)findViewById(R.id.password_staff);
         mPasswordViewCnf = (EditText)findViewById(R.id.password_conf_staff);
+
+        if(getIntent().hasExtra("Staff")){
+            staff = (Staff)getIntent().getSerializableExtra("Staff");
+            mName.setText(staff.name);
+            mPhone.setText(staff.number);
+            mPasswordView.setVisibility(View.GONE);
+            mPasswordViewCnf.setVisibility(View.GONE);
+            ((Button)findViewById(R.id.register_staff)).setText("Update");
+            isUpdate = true;
+        }
 
         findViewById(R.id.register_staff).setOnClickListener(this);
     }
@@ -80,23 +96,25 @@ public class AddStaffActivity extends AppCompatActivity implements View.OnClickL
         boolean cancel = false;
         View focusView = null;
 
-        // Check for a valid password, if the user entered one.
-        if (!password.equalsIgnoreCase(passCnf) ) {
-            mPasswordViewCnf.setError(getString(R.string.error_incorrect_password));
-            focusView = mPasswordViewCnf;
-            cancel = true;
-        }
+        if(!isUpdate) {
+            // Check for a valid password, if the user entered one.
+            if (!password.equalsIgnoreCase(passCnf)) {
+                mPasswordViewCnf.setError(getString(R.string.error_incorrect_password));
+                focusView = mPasswordViewCnf;
+                cancel = true;
+            }
 
-        if (TextUtils.isEmpty(password) || !Utils.isPasswordValid(password)) {
-            mPasswordView.setError(getString(R.string.error_invalid_password));
-            focusView = mPasswordView;
-            cancel = true;
-        }
+            if (TextUtils.isEmpty(password) || !Utils.isPasswordValid(password)) {
+                mPasswordView.setError(getString(R.string.error_invalid_password));
+                focusView = mPasswordView;
+                cancel = true;
+            }
 
-        if (TextUtils.isEmpty(name)) {
-            mName.setError(getString(R.string.error_field_required));
-            focusView = mName;
-            cancel = true;
+            if (TextUtils.isEmpty(name)) {
+                mName.setError(getString(R.string.error_field_required));
+                focusView = mName;
+                cancel = true;
+            }
         }
 
         // Check for a valid email address.
@@ -126,15 +144,24 @@ public class AddStaffActivity extends AppCompatActivity implements View.OnClickL
         protected void onPreExecute() {
             super.onPreExecute();
             dialog = new ProgressDialog(AddStaffActivity.this);
-            dialog.setMessage("Adding...");
+            if(isUpdate) {
+                dialog.setMessage("Updating...");
+            }else {
+                dialog.setMessage("Adding...");
+            }
             dialog.setCanceledOnTouchOutside(false);
             dialog.show();
         }
 
         @Override
         protected String doInBackground(String... strings) {
-            param = "gymtag=addstaff&txtphone=" + strings[0] +"&txtpass=" + strings[1]
-                    +"&txtname=" + strings[2]+"&gym_id=" + Utils.getStringSharedPreference(AddStaffActivity.this,Constants.SHARED_GYM_ID);
+            if(isUpdate) {
+                param = "gymtag=editstaff&txtphone=" + strings[0] +"&staff_id=" + staff.staffId
+                        +"&txtname=" + strings[2]+"&gym_id=" + Utils.getStringSharedPreference(AddStaffActivity.this,Constants.SHARED_GYM_ID);
+            } else {
+                param = "gymtag=addstaff&txtphone=" + strings[0] +"&txtpass=" + strings[1]
+                        +"&txtname=" + strings[2]+"&gym_id=" + Utils.getStringSharedPreference(AddStaffActivity.this,Constants.SHARED_GYM_ID);
+            }
             param = param.replace(" " ,"%20");
             try {
                 String response = RestClient.httpPost(Url.STAFF_URL, param);

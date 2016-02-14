@@ -8,10 +8,11 @@ import android.support.v4.content.CursorLoader;
 
 import com.omak.smartfees.DB.ContentProviderDb;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 
-public class Customer {
+public class Customer implements Serializable{
 	
 	public static final String TABLE_CUSTOMER_DB = "TABLE_CUSTOMER_DB";
 	
@@ -146,6 +147,21 @@ public class Customer {
 		return studentList;
 	}
 
+	public static ArrayList<Customer> getMemberListInGymSearch(Context context,String gym_id,String search) {
+		ArrayList<Customer> studentList = new ArrayList<Customer>();
+		Uri contentUri = Uri.withAppendedPath(ContentProviderDb.CONTENT_URI, TABLE_CUSTOMER_DB);
+		String selection = GYM_ID+ " = '" +gym_id+"' AND " + DELETED + " != 'yes'" + " AND " + NAME + " LIKE '%" + search +"%'";
+		Cursor cursor = context.getContentResolver().query(contentUri, null, selection, null, NAME + " ASC");
+		if (cursor != null && cursor.getCount() > 0) {
+			cursor.moveToFirst();
+			do {
+				studentList.add(getValueFromCursor(cursor));
+			} while (cursor.moveToNext());
+		}
+		cursor.close();
+		return studentList;
+	}
+
 	public static ArrayList<Customer> getAllMemberListInGymNotInsterted(Context context,String gym_id) {
 		ArrayList<Customer> studentList = new ArrayList<Customer>();
 		Uri contentUri = Uri.withAppendedPath(ContentProviderDb.CONTENT_URI, TABLE_CUSTOMER_DB);
@@ -187,9 +203,15 @@ public class Customer {
 		return resultUri;
 	}
 	
-	public static int deleteCustomer(Context context,String id) {
+	public static int deleteCustomer(Context context,String regNum) {
 		Uri contentUri = Uri.withAppendedPath(ContentProviderDb.CONTENT_URI, TABLE_CUSTOMER_DB);
-		int resultUri = context.getContentResolver().delete(contentUri, ID+"=?", new String[] {id});
+		int resultUri = context.getContentResolver().delete(contentUri, REG_NO + "=?", new String[]{regNum});
+		return resultUri;
+	}
+
+	public static int deleteAllCustomer(Context context) {
+		Uri contentUri = Uri.withAppendedPath(ContentProviderDb.CONTENT_URI, TABLE_CUSTOMER_DB);
+		int resultUri = context.getContentResolver().delete(contentUri,null,null);
 		return resultUri;
 	}
 

@@ -12,6 +12,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.omak.smartfees.Adapter.MemberAdapter;
@@ -54,8 +55,24 @@ public class HomeActivity extends AppCompatActivity {
             public void onClick(View view) {
 //                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
 //                        .setAction("Action", null).show();
-                Intent intent = new Intent(HomeActivity.this,RegisterActivity.class);
+                Intent intent = new Intent(HomeActivity.this, RegisterActivity.class);
                 startActivity(intent);
+            }
+        });
+        final EditText search = (EditText) findViewById(R.id.search_txt);
+        findViewById(R.id.search_btn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                membersList = new ArrayList<Customer>();
+                membersList = Customer.getMemberListInGymSearch(HomeActivity.this, Utils.getStringSharedPreference(HomeActivity.this, Constants.SHARED_GYM_ID),
+                        search.getText().toString());
+                if(membersList.size() > 0) {
+                    noList.setVisibility(View.GONE);
+                    adapter = new MemberAdapter(membersList, HomeActivity.this);
+                    mRecyclerView.setAdapter(adapter);
+                } else {
+                    mRecyclerView.setAdapter(null);
+                }
             }
         });
     }

@@ -16,7 +16,6 @@ public class MainHomeActivity extends AppCompatActivity implements View.OnClickL
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_home);
-        getSupportActionBar().setTitle(Utils.getStringSharedPreference(this, Constants.SHARED_GYM_NAME).toUpperCase());
         findViewById(R.id.member_btn).setOnClickListener(this);
         findViewById(R.id.staff_btn).setOnClickListener(this);
         findViewById(R.id.profile_btn).setOnClickListener(this);
@@ -28,6 +27,11 @@ public class MainHomeActivity extends AppCompatActivity implements View.OnClickL
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        getSupportActionBar().setTitle(Utils.getStringSharedPreference(this, Constants.SHARED_GYM_NAME));
+    }
 
     @Override
     public void onClick(View view) {

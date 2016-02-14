@@ -19,6 +19,7 @@ import android.text.TextUtils;
 import android.util.Base64;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -59,6 +60,8 @@ public class RegisterActivity extends AppCompatActivity {
     private ProgressDialog dialog;
     private Bitmap bitmap;
     private String memID;
+    private Customer member;
+    private boolean isupdate = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,7 +82,7 @@ public class RegisterActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 DatePickerFragment fragment = new DatePickerFragment();
-                fragment.show(getSupportFragmentManager(),"date");
+                fragment.show(getSupportFragmentManager(), "date");
             }
         });
 
@@ -106,6 +109,18 @@ public class RegisterActivity extends AppCompatActivity {
                 }
             }
         });
+        if(getIntent().hasExtra("Member")) {
+            isupdate = true;
+            member = (Customer)getIntent().getSerializableExtra("Member");
+            mName.setText(member.name);
+            mMobile.setText(member.phone);
+            mAge.setText(member.age);
+            mweight.setText(member.weight);
+            mRegnum.setText(member.regNum);
+            mAddress.setText(member.address);
+            mDate.setText(member.date);
+            ((Button)findViewById(R.id.register)).setText("Update");
+        }
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -310,23 +325,35 @@ public class RegisterActivity extends AppCompatActivity {
         @Override
         public String doInBackground(String... params) {
             Customer model = new Customer();
-            model.gymId = Utils.getStringSharedPreference(RegisterActivity.this, Constants.SHARED_GYM_ID);
-            model.regNum = params[4];
-            model.name = params[0];
-            model.phone = params[1];
-            model.address = params[5];
-            model.age = params[2];
-            model.date = params[6];
-            model.weight = params[3];
-            model.blocked = "No";
-            model.deleted = "No";
-            model.stored = "No";
+
+                model.gymId = Utils.getStringSharedPreference(RegisterActivity.this, Constants.SHARED_GYM_ID);
+                model.regNum = params[4];
+                model.name = params[0];
+                model.phone = params[1];
+                model.address = params[5];
+                model.age = params[2];
+                model.date = params[6];
+                model.weight = params[3];
+                model.blocked = "No";
+                model.deleted = "No";
+                model.stored = "No";
+
+            if(isupdate) {
+                model.memberId = member.memberId;
+                model._id = member._id;
+            }
 
             if(Utils.checkNetwork(RegisterActivity.this)) {
-
-                String param = "gymtag=addmember&txtname=" + model.name + "&txtphone=" + model.phone + "&txtdob=" + model.age
-                        + "&txtregno=" + model.regNum + "&txtweight=" + model.weight + "&txtaddress=" + model.address + "&txtjoindate=" + model.date
-                        + "&staff_id=" + "" + "&staff_type=" + "" + "&gym_id=" + model.gymId;
+                String param = "";
+                if(isupdate) {
+                    param = "gymtag=editmember&txtname=" + model.name + "&txtphone=" + model.phone + "&txtdob=" + model.age
+                            + "&txtregno=" + model.regNum + "&txtweight=" + model.weight + "&txtaddress=" + model.address + "&txtjoindate=" + model.date
+                            + "&staff_id=" + "" + "&staff_type=" + "" + "&gym_id=" + model.gymId + "&mem_id=" + model.memberId;
+                }else {
+                    param = "gymtag=addmember&txtname=" + model.name + "&txtphone=" + model.phone + "&txtdob=" + model.age
+                            + "&txtregno=" + model.regNum + "&txtweight=" + model.weight + "&txtaddress=" + model.address + "&txtjoindate=" + model.date
+                            + "&staff_id=" + "" + "&staff_type=" + "" + "&gym_id=" + model.gymId;
+                }
                 param = param.replace(" ", "%20");
                 try {
                     String response = RestClient.httpPost(Url.MEMBER_URL, param);
@@ -334,9 +361,17 @@ public class RegisterActivity extends AppCompatActivity {
                     jsonObject = jsonObject.getJSONObject("response");
                     if (jsonObject.getString("status").equalsIgnoreCase("success")) {
                         model.stored = "yes";
-                        model.memberId = jsonObject.getString("mem_id");
-                        memID = model.memberId;
-                        Customer.insertMember(RegisterActivity.this, model);
+                        if(!isupdate) {
+                            model.memberId = jsonObject.getString("mem_id");
+                            memID = model.memberId;
+                        } else {
+                            memID = model.memberId;
+                        }
+                        if(isupdate) {
+                            Customer.updateDetails(RegisterActivity.this, model);
+                        } else {
+                            Customer.insertMember(RegisterActivity.this, model);
+                        }
 //                        upload();
                         return jsonObject.getString("status");
                     } else {
@@ -347,7 +382,11 @@ public class RegisterActivity extends AppCompatActivity {
                     return e.getMessage();
                 }
             } else {
-                Customer.insertMember(RegisterActivity.this, model);
+                if(isupdate) {
+                    Customer.updateDetails(RegisterActivity.this, model);
+                } else {
+                    Customer.insertMember(RegisterActivity.this, model);
+                }
                 return "success";
             }
         }
@@ -359,7 +398,7 @@ public class RegisterActivity extends AppCompatActivity {
                 dialog.dismiss();
             }
             Toast.makeText(RegisterActivity.this, success, Toast.LENGTH_SHORT).show();
-
+            finish();
         }
 
         @Override
@@ -392,7 +431,14 @@ public class RegisterActivity extends AppCompatActivity {
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
             byte[] byte_arr = stream.toByteArray();
             // Encode Image to String
-            encodedString = Base64.encodeToString(byte_arr, Base64.DEFAULT);
+            encodedString = Base64.encodeToString(byte_arr, 0);
+            try {
+                upload();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
             return null;
         }
 
@@ -455,6 +501,7 @@ public class RegisterActivity extends AppCompatActivity {
         String object = new String();
         object = "image=" + encodedString ;
         Logger.e(filename);
+        memID = 5 + "";
         String gym_id = Utils.getStringSharedPreference(RegisterActivity.this, Constants.SHARED_GYM_ID);
         URL url = new URL("http://gymapp.oddsoftsolutions.com/gym_member.php?gymtag=addphoto&mem_id=" + memID +
                 "&gym_id=" + gym_id +"&staff_id=2&staff_type=staff&filename=" + filename);
