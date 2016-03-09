@@ -16,6 +16,7 @@ public class RestClient {
     static int sockettimeout = 10000;
 
     public static String httpGet(String myurl) throws IOException {
+        Logger.e(myurl);
         URL url = new URL(myurl);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 //            conn.setReadTimeout(10000 /* milliseconds */);

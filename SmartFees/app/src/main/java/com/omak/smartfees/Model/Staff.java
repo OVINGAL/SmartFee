@@ -11,6 +11,8 @@ public class Staff implements Serializable{
 
     public String name;
 
+    public String email;
+
     public String number;
 
     public String password;

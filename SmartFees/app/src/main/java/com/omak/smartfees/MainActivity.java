@@ -8,6 +8,7 @@ import android.os.Bundle;
 
 import com.omak.smartfees.Global.Constants;
 import com.omak.smartfees.Global.Utils;
+import com.splunk.mint.Mint;
 
 import java.util.Calendar;
 
@@ -59,6 +60,7 @@ public class MainActivity extends Activity {
          * Run the code inside the runnable after the display time is finished
          * using a handler
          */
+        Mint.initAndStartSession(MainActivity.this, "b5fd4e68");
         handler.postDelayed(mrun, 2 * SPLASH_DISPLAY_LENGTH);
     }
 

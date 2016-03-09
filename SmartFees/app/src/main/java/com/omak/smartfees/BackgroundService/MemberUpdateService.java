@@ -62,16 +62,59 @@ public class MemberUpdateService extends IntentService {
                         JSONObject jsonObject = new JSONObject(response);
                         jsonObject = jsonObject.getJSONObject("response");
                         if (jsonObject.getString("status").equalsIgnoreCase("success")) {
-                            if(model.blocked.equalsIgnoreCase("No")) {
-                                model.stored = "yes";
-                            }
-                            Customer.insertMember(this, model);
+                            model.stored = "yes";
+                            model.memberId = jsonObject.getString("mem_id");
+                            Customer.updateDetails(this, model);
                         }
 
                     } catch (Exception e) {
                     }
                 }
             }
+
+            customers = Customer.getAllMemberListInGymNotUpdated(this, id);
+            for (Customer model:customers) {
+                if(Utils.checkNetwork(this)) {
+                    //s.blocked = staffJson.getString("mem_status").equalsIgnoreCase("1") ? "No" : "Yes";
+                    String status = model.blocked.equalsIgnoreCase("No") ? "1" : "2";
+                    String param = "gymtag=editmember&txtname=" + model.name + "&txtphone=" + model.phone + "&txtdob=" + model.age
+                            + "&txtregno=" + model.regNum + "&txtweight=" + model.weight + "&txtaddress=" + model.address + "&txtjoindate=" + model.date
+                            + "&staff_id=" + "" + "&staff_type=" + "" + "&gym_id=" + model.gymId + "&mem_id=" + model.memberId + "&txtstatus=" + status;
+                    param = param.replace(" ", "%20");
+                    try {
+                        String response = RestClient.httpPost(Url.MEMBER_URL, param);
+                        JSONObject jsonObject = new JSONObject(response);
+                        jsonObject = jsonObject.getJSONObject("response");
+                        if (jsonObject.getString("status").equalsIgnoreCase("success")) {
+                            model.stored = "yes";
+                            Customer.updateDetails(this, model);
+                        }
+
+                    } catch (Exception e) {
+                    }
+                }
+            }
+
+
+            customers = Customer.getAllMemberListInGymDeleted(this, id);
+            for (Customer model:customers) {
+                if(Utils.checkNetwork(this)) {
+
+                    String param = "gymtag=deletemember&mem_id=" + model.memberId +"&gym_id=" + id;
+                    try {
+                        String response = RestClient.httpPost(Url.STAFF_URL, param);
+                        JSONObject jsonObject = new JSONObject(response);
+                        jsonObject = jsonObject.getJSONObject("response");
+                        if(jsonObject.getString("status").equalsIgnoreCase("success")) {
+                            Customer.deleteCustomer(this, model.regNum);
+                        } else {
+                        }
+
+                    } catch (Exception e) {
+                    }
+                }
+            }
+
             if(Utils.checkNetwork(this)) {
                 String callTime = Utils.getStringSharedPreference(getApplicationContext(), "LastUpdatedTime");
                 if(callTime.length() < 2) {

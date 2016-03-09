@@ -26,7 +26,7 @@ public class AddStaffActivity extends AppCompatActivity implements View.OnClickL
 
     // UI references.
     private EditText mPasswordView,mPasswordViewCnf,mPhone;
-    private EditText mName;
+    private EditText mName,mEmail;
     private ProgressDialog dialog;
     private Staff staff;
     private boolean isUpdate = false;
@@ -41,6 +41,7 @@ public class AddStaffActivity extends AppCompatActivity implements View.OnClickL
 
 
         mName = (EditText)findViewById(R.id.name_staff);
+        mEmail = (EditText)findViewById(R.id.email_staff);
         mPhone = (EditText)findViewById(R.id.mobile_staff);
         mPasswordView = (EditText)findViewById(R.id.password_staff);
         mPasswordViewCnf = (EditText)findViewById(R.id.password_conf_staff);
@@ -48,6 +49,7 @@ public class AddStaffActivity extends AppCompatActivity implements View.OnClickL
         if(getIntent().hasExtra("Staff")){
             staff = (Staff)getIntent().getSerializableExtra("Staff");
             mName.setText(staff.name);
+            mEmail.setText(staff.email);
             mPhone.setText(staff.number);
             mPasswordView.setVisibility(View.GONE);
             mPasswordViewCnf.setVisibility(View.GONE);
@@ -85,9 +87,11 @@ public class AddStaffActivity extends AppCompatActivity implements View.OnClickL
         mPasswordView.setError(null);
         mPasswordViewCnf.setError(null);
         mName.setError(null);
+        mEmail.setError(null);
 
         // Store values at the time of the login attempt.
         String name = mName.getText().toString();
+        String email = mEmail.getText().toString();
         String number = mPhone.getText().toString();
         String password = mPasswordView.getText().toString();
         String passCnf = mPasswordViewCnf.getText().toString();
@@ -115,6 +119,11 @@ public class AddStaffActivity extends AppCompatActivity implements View.OnClickL
                 focusView = mName;
                 cancel = true;
             }
+            if (TextUtils.isEmpty(email)) {
+                mEmail.setError(getString(R.string.error_field_required));
+                focusView = mName;
+                cancel = true;
+            }
         }
 
         // Check for a valid email address.
@@ -132,7 +141,7 @@ public class AddStaffActivity extends AppCompatActivity implements View.OnClickL
             focusView.requestFocus();
         } else {
             mAuthTask = new AddStaffAsync();
-            mAuthTask.execute(number,password,name);
+            mAuthTask.execute(number,password,name,email);
         }
     }
 
@@ -156,10 +165,10 @@ public class AddStaffActivity extends AppCompatActivity implements View.OnClickL
         @Override
         protected String doInBackground(String... strings) {
             if(isUpdate) {
-                param = "gymtag=editstaff&txtphone=" + strings[0] +"&staff_id=" + staff.staffId
+                param = "gymtag=editstaff&txtphone=" + strings[0] +"&staff_id=" + staff.staffId +"&txtmail=" + staff.email
                         +"&txtname=" + strings[2]+"&gym_id=" + Utils.getStringSharedPreference(AddStaffActivity.this,Constants.SHARED_GYM_ID);
             } else {
-                param = "gymtag=addstaff&txtphone=" + strings[0] +"&txtpass=" + strings[1]
+                param = "gymtag=addstaff&txtphone=" + strings[0] +"&txtpass=" + strings[1] +"&txtmail=" + strings[3]
                         +"&txtname=" + strings[2]+"&gym_id=" + Utils.getStringSharedPreference(AddStaffActivity.this,Constants.SHARED_GYM_ID);
             }
             param = param.replace(" " ,"%20");
@@ -170,7 +179,7 @@ public class AddStaffActivity extends AppCompatActivity implements View.OnClickL
                 if(jsonObject.getString("status").equalsIgnoreCase("success")) {
                     return jsonObject.getString("status");
                 } else {
-                    return jsonObject.getString("status");
+                    return jsonObject.getString("status_msg");
                 }
 
             } catch (Exception e) {

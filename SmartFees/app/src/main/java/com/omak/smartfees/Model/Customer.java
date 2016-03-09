@@ -79,7 +79,7 @@ public class Customer implements Serializable{
 		StringBuilder createStatment = new StringBuilder("CREATE TABLE ").append(TABLE_CUSTOMER_DB).append(" (").append(ID).append(" INTEGER PRIMARY KEY AUTOINCREMENT,")
 				.append(MEMBER_ID).append(" TEXT,").append(GYM_ID).append(" TEXT,").append(REG_NO).append(" TEXT,").append(NAME).append(" TEXT,").append(PHOTO).append(" TEXT,")
 				.append(BLOCKED).append(" TEXT,").append(DELETED).append(" TEXT,").append(STORED).append(" TEXT,").append(PHONE).append(" TEXT,")
-				.append(AGE).append(" TEXT,").append(ADDRESS).append(" TEXT,").append(DATE).append(" TEXT,").append(WEIGHT).append(" TEXT,").append("unique (regnumber))");
+				.append(AGE).append(" TEXT,").append(ADDRESS).append(" TEXT,").append(DATE).append(" TEXT,").append(WEIGHT).append(" TEXT,").append("unique (regnumber) on conflict fail)");
 		return createStatment.toString();
 	}
 
@@ -177,6 +177,35 @@ public class Customer implements Serializable{
 		return studentList;
 	}
 
+	public static ArrayList<Customer> getAllMemberListInGymNotUpdated(Context context,String gym_id) {
+		ArrayList<Customer> studentList = new ArrayList<Customer>();
+		Uri contentUri = Uri.withAppendedPath(ContentProviderDb.CONTENT_URI, TABLE_CUSTOMER_DB);
+		String selection = GYM_ID+ " = '" +gym_id+"' AND " + STORED + " = 'No'";
+		Cursor cursor = context.getContentResolver().query(contentUri, null, selection, null, NAME + " ASC");
+		if (cursor != null && cursor.getCount() > 0) {
+			cursor.moveToFirst();
+			do {
+				studentList.add(getValueFromCursor(cursor));
+			} while (cursor.moveToNext());
+		}
+		cursor.close();
+		return studentList;
+	}
+
+	public static ArrayList<Customer> getAllMemberListInGymDeleted(Context context,String gym_id) {
+		ArrayList<Customer> studentList = new ArrayList<Customer>();
+		Uri contentUri = Uri.withAppendedPath(ContentProviderDb.CONTENT_URI, TABLE_CUSTOMER_DB);
+		String selection = GYM_ID+ " = '" +gym_id+"' AND " + DELETED + " = 'Yes'";
+		Cursor cursor = context.getContentResolver().query(contentUri, null, selection, null, NAME + " ASC");
+		if (cursor != null && cursor.getCount() > 0) {
+			cursor.moveToFirst();
+			do {
+				studentList.add(getValueFromCursor(cursor));
+			} while (cursor.moveToNext());
+		}
+		cursor.close();
+		return studentList;
+	}
 //	public static CursorLoader getStudentListInClassCursor(Context context,String selectedClass) {
 //		Uri contentUri = Uri.withAppendedPath(ContentProviderDb.CONTENT_URI, TABLE_CUSTOMER_DB);
 //		String selection = CLASS_DIV+ " = '" +selectedClass+"'";

@@ -8,22 +8,29 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.graphics.drawable.BitmapDrawable;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
+//import org.apache.commons.codec.binary.Base64;
 import android.util.Base64;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.omak.smartfees.Global.Constants;
 import com.omak.smartfees.Global.Logger;
 import com.omak.smartfees.Global.Utils;
@@ -31,6 +38,14 @@ import com.omak.smartfees.Model.Customer;
 import com.omak.smartfees.Network.RestClient;
 import com.omak.smartfees.Network.Url;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -42,6 +57,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -62,6 +78,9 @@ public class RegisterActivity extends AppCompatActivity {
     private String memID;
     private Customer member;
     private boolean isupdate = false;
+    private ImageView db;
+    private String mSavedpath = "";
+    Customer model;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -92,8 +111,8 @@ public class RegisterActivity extends AppCompatActivity {
                 registerMember();
             }
         });
-
-        findViewById(R.id.dp).setOnClickListener(new View.OnClickListener() {
+        db = (ImageView)findViewById(R.id.dp);
+        db.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -109,6 +128,25 @@ public class RegisterActivity extends AppCompatActivity {
                 }
             }
         });
+        findViewById(R.id.rotate).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(bitmap == null) {
+                    bitmap = ((BitmapDrawable)db.getDrawable()).getBitmap();
+                }
+                Matrix matrix = new Matrix();
+                matrix.setRotate(90);
+                try {
+                    Bitmap bmRotated = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+                    bitmap.recycle();
+                    bitmap = bmRotated;
+                    db.setImageBitmap(bmRotated);
+                } catch (OutOfMemoryError e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+//        http://gymapp.oddsoftsolutions.com/uploadedimages/14571164952016-03-04-15-27-09-470.jpg
         if(getIntent().hasExtra("Member")) {
             isupdate = true;
             member = (Customer)getIntent().getSerializableExtra("Member");
@@ -120,7 +158,72 @@ public class RegisterActivity extends AppCompatActivity {
             mAddress.setText(member.address);
             mDate.setText(member.date);
             ((Button)findViewById(R.id.register)).setText("Update");
+            if(member.photo != null && member.photo.length() > 0 ){
+                String imageurl = "http://gymapp.oddsoftsolutions.com/uploadedimages/" + member.photo;
+                Logger.e(" Glide  " + imageurl);
+                Glide.with(RegisterActivity.this).load(imageurl)
+                        .error(R.drawable.ic_launcher)
+                        .into(db);
+            } else {
+                db.setImageResource(R.drawable.ic_launcher);
+            }
         }
+    }
+
+    public static Bitmap rotateBitmap(Bitmap bitmap, int orientation) {
+
+        Matrix matrix = new Matrix();
+        switch (orientation) {
+            case ExifInterface.ORIENTATION_NORMAL:
+                return bitmap;
+            case ExifInterface.ORIENTATION_FLIP_HORIZONTAL:
+                matrix.setScale(-1, 1);
+                break;
+            case ExifInterface.ORIENTATION_ROTATE_180:
+                matrix.setRotate(180);
+                break;
+            case ExifInterface.ORIENTATION_FLIP_VERTICAL:
+                matrix.setRotate(180);
+                matrix.postScale(-1, 1);
+                break;
+            case ExifInterface.ORIENTATION_TRANSPOSE:
+                matrix.setRotate(90);
+                matrix.postScale(-1, 1);
+                break;
+            case ExifInterface.ORIENTATION_ROTATE_90:
+                matrix.setRotate(90);
+                break;
+            case ExifInterface.ORIENTATION_TRANSVERSE:
+                matrix.setRotate(-90);
+                matrix.postScale(-1, 1);
+                break;
+            case ExifInterface.ORIENTATION_ROTATE_270:
+                matrix.setRotate(-90);
+                break;
+            default:
+                return bitmap;
+        }
+        try {
+            Bitmap bmRotated = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+            bitmap.recycle();
+            return bmRotated;
+        } catch (OutOfMemoryError e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private int getOrientation(String path){
+        ExifInterface exif = null;
+        try {
+            exif = new ExifInterface(path);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION,
+                ExifInterface.ORIENTATION_UNDEFINED);
+
+        return orientation;
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -131,19 +234,35 @@ public class RegisterActivity extends AppCompatActivity {
                 switch (requestCode) {
 
                     case 1001:
-                        selectedImageUri = data.getData();
-                        Logger.e(selectedImageUri + "      URI");
-                        filePath = getPath(selectedImageUri, MediaStore.Images.Media.DATA);
-                        Logger.e(filePath + "     PATH");
-                        file = new File(filePath);
-                        UploadDoc uploadDoc = new UploadDoc();
-                        uploadDoc.execute();
+                        if(data.getData() != null) {
+                            selectedImageUri = data.getData();
+                            Logger.e(selectedImageUri + "      URI");
+                            filePath = getPath(selectedImageUri, MediaStore.Images.Media.DATA);
+                            Logger.e(filePath + "     PATH");
+                            file = new File(filePath);
+                            BitmapFactory.Options options = null;
+                            options = new BitmapFactory.Options();
+                            bitmap = BitmapFactory.decodeFile(filePath, options);
+//                            bitmap = rotateBitmap(bitmap, getOrientation(filePath));
+//                            FileUpload fileUpload = new FileUpload();
+//                            mSavedpath = fileUpload.SaveImage(bitmap, filename);
+//                            Logger.e("Path saved " + mSavedpath);
+                            db.setImageBitmap(bitmap);
+                        } else if(data.getExtras() != null) {
+                            Bundle bundle = data.getExtras();
+                            bitmap = (Bitmap) bundle.get("data");
+                            filename = "Camera_" + Calendar.getInstance().getTimeInMillis();
+                            FileUpload fileUpload = new FileUpload();
+                            mSavedpath = fileUpload.SaveImage(bitmap, filename);
+                            filePath = mSavedpath;
+                            db.setImageBitmap(bitmap);
+                        }
                         break;
 
                 }
             }
         } catch (Exception e) {
-            Toast.makeText(this, "Something went wrong", Toast.LENGTH_LONG)
+            Toast.makeText(this, "Something went wrong  " + e.getMessage() , Toast.LENGTH_LONG)
                     .show();
         }
     }
@@ -153,18 +272,6 @@ public class RegisterActivity extends AppCompatActivity {
         if (uri == null) {
             return null;
         }
-//        // try to retrieve the image from the media store first
-//        // this will only work for images selected from gallery
-//        String[] projection = {projectionVal};
-//        Cursor cursor = managedQuery(uri, projection, null, null, null);
-//        if (cursor != null) {
-//            int column_index = cursor
-//                    .getColumnIndexOrThrow(projectionVal);
-//            cursor.moveToFirst();
-//            return cursor.getString(column_index);
-//        }
-//        // this is our fallback here
-//        return uri.getPath();
 
         Uri selectedImage = uri;
         String[] filePathColumn = { MediaStore.Images.Media.DATA };
@@ -324,7 +431,7 @@ public class RegisterActivity extends AppCompatActivity {
 
         @Override
         public String doInBackground(String... params) {
-            Customer model = new Customer();
+             model = new Customer();
 
                 model.gymId = Utils.getStringSharedPreference(RegisterActivity.this, Constants.SHARED_GYM_ID);
                 model.regNum = params[4];
@@ -337,7 +444,7 @@ public class RegisterActivity extends AppCompatActivity {
                 model.blocked = "No";
                 model.deleted = "No";
                 model.stored = "No";
-
+                model.photo = filename;
             if(isupdate) {
                 model.memberId = member.memberId;
                 model._id = member._id;
@@ -346,9 +453,10 @@ public class RegisterActivity extends AppCompatActivity {
             if(Utils.checkNetwork(RegisterActivity.this)) {
                 String param = "";
                 if(isupdate) {
+                    String status = model.blocked.equalsIgnoreCase("No") ? "1" : "2";
                     param = "gymtag=editmember&txtname=" + model.name + "&txtphone=" + model.phone + "&txtdob=" + model.age
                             + "&txtregno=" + model.regNum + "&txtweight=" + model.weight + "&txtaddress=" + model.address + "&txtjoindate=" + model.date
-                            + "&staff_id=" + "" + "&staff_type=" + "" + "&gym_id=" + model.gymId + "&mem_id=" + model.memberId;
+                            + "&staff_id=" + "" + "&staff_type=" + "" + "&gym_id=" + model.gymId + "&mem_id=" + model.memberId + "&txtstatus=" + status;
                 }else {
                     param = "gymtag=addmember&txtname=" + model.name + "&txtphone=" + model.phone + "&txtdob=" + model.age
                             + "&txtregno=" + model.regNum + "&txtweight=" + model.weight + "&txtaddress=" + model.address + "&txtjoindate=" + model.date
@@ -398,7 +506,12 @@ public class RegisterActivity extends AppCompatActivity {
                 dialog.dismiss();
             }
             Toast.makeText(RegisterActivity.this, success, Toast.LENGTH_SHORT).show();
-            finish();
+            if(bitmap != null) {
+                UploadDoc uploadDoc = new UploadDoc();
+                uploadDoc.execute();
+            } else {
+                finish();
+            }
         }
 
         @Override
@@ -407,7 +520,7 @@ public class RegisterActivity extends AppCompatActivity {
         }
     }
 
-    public class UploadDoc extends AsyncTask<Void, Void, Void> {
+    public class UploadDoc extends AsyncTask<Void, Void, String> {
 
         ProgressDialog dialog;
         String serverResponse = "";
@@ -422,16 +535,7 @@ public class RegisterActivity extends AppCompatActivity {
         }
 
         @Override
-        protected Void doInBackground(Void... voids) {
-            BitmapFactory.Options options = null;
-            options = new BitmapFactory.Options();
-            bitmap = BitmapFactory.decodeFile(filePath, options);
-            ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            // Must compress the Image to reduce image size to make upload easy
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
-            byte[] byte_arr = stream.toByteArray();
-            // Encode Image to String
-            encodedString = Base64.encodeToString(byte_arr, 0);
+        protected String doInBackground(Void... voids) {
             try {
                 upload();
             } catch (IOException e) {
@@ -439,103 +543,52 @@ public class RegisterActivity extends AppCompatActivity {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            return null;
+            return "";
         }
 
         @Override
-        protected void onPostExecute(Void aVoid) {
+        protected void onPostExecute(String aVoid) {
             super.onPostExecute(aVoid);
-            Logger.e(" serverResponse :  " + serverResponse);
+
+            finish();
+            Logger.e(" serverResponse :  " + aVoid);
             dialog.dismiss();
         }
     }
 
-    // Make Http call to upload Image to Php server
-//    public void makeHTTPCall() {
-//        RequestParams params = new RequestParams();
-//        params.put("image",encodedString);
-//        AsyncHttpClient client = new AsyncHttpClient();
-//        // Don't forget to change the IP address to your LAN address. Port no as well.
-//        client.post("http://gymapp.oddsoftsolutions.com/gym_photo.php",
-//                params, new AsyncHttpResponseHandler() {
-//                    // When the response returned by REST has Http
-//                    // response code '200'
-//                    @Override
-//                    public void onSuccess(String response) {
-//                        // Hide Progress Dialog
-//                        Logger.e(response);
-//                    }
-//
-//                    // When the response returned by REST has Http
-//                    // response code other than '200' such as '404',
-//                    // '500' or '403' etc
-//                    @Override
-//                    public void onFailure(int statusCode, Throwable error,
-//                                          String content) {
-//                        // Hide Progress Dialog
-//                        // When Http response code is '404'
-//                        if (statusCode == 404) {
-//                            Toast.makeText(getApplicationContext(),
-//                                    "Requested resource not found",
-//                                    Toast.LENGTH_LONG).show();
-//                        }
-//                        // When Http response code is '500'
-//                        else if (statusCode == 500) {
-//                            Toast.makeText(getApplicationContext(),
-//                                    "Something went wrong at server end",
-//                                    Toast.LENGTH_LONG).show();
-//                        }
-//                        // When Http response code other than 404, 500
-//                        else {
-//                            Toast.makeText(
-//                                    getApplicationContext(),
-//                                    "Error Occured n Most Common Error: n1. Device not connected to Internetn2. Web App is not deployed in App servern3. App server is not runningn HTTP Status code : "
-//                                            + statusCode, Toast.LENGTH_LONG)
-//                                    .show();
-//                        }
-//                    }
-//                });
-//    }
-
     private void upload() throws IOException,JSONException {
-        String object = new String();
-        object = "image=" + encodedString ;
-        Logger.e(filename);
-        memID = 5 + "";
         String gym_id = Utils.getStringSharedPreference(RegisterActivity.this, Constants.SHARED_GYM_ID);
-        URL url = new URL("http://gymapp.oddsoftsolutions.com/gym_member.php?gymtag=addphoto&mem_id=" + memID +
-                "&gym_id=" + gym_id +"&staff_id=2&staff_type=staff&filename=" + filename);
-        HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
-        httpURLConnection.setRequestMethod("POST");
-        httpURLConnection.setDoOutput(true);
-        httpURLConnection.setChunkedStreamingMode(1024);
+        String url = "http://gymapp.oddsoftsolutions.com/gym_member.php?gymtag=addphoto&mem_id=" + memID +
+                "&gym_id=" + gym_id +"&staff_id=2&staff_type=staff&filename=" + filename;
+        ByteArrayOutputStream bao = new ByteArrayOutputStream();
 
-        httpURLConnection.setRequestProperty("Content-Type", "bitmap;charset=utf-8");
-        httpURLConnection.setRequestProperty("Connection", "Keep-Alive");
-        httpURLConnection.setRequestProperty("Transfer-Encoding", "chunked");
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 90, bao);
+        byte [] ba = bao.toByteArray();
+        String image_str = Base64.encodeToString(ba, Base64.DEFAULT);
+        ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
 
-        OutputStream outStream = httpURLConnection.getOutputStream();
-        if (outStream != null) {
-            if (encodedString.length() > 0) {
-                outStream.write(object.toString().getBytes());
-            }
+        nameValuePairs.add(new BasicNameValuePair("image", image_str));
 
-            outStream.flush();
-            outStream.close();
-            outStream = null;
-        }
-        httpURLConnection.connect();
-        int response = httpURLConnection.getResponseCode();
-        Logger.e(" Code  " + response);
-        InputStream is;
-        if(response > 400) {
-            is = httpURLConnection.getErrorStream();
-        }
-        else {
-            is = httpURLConnection.getInputStream();
-        }
+
+        HttpClient httpclient = new DefaultHttpClient();
+        HttpPost httppost = new HttpPost(url);
+        httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+        HttpResponse response = httpclient.execute(httppost);
+        HttpEntity entity = response.getEntity();
+        InputStream is = entity.getContent();
         String contentAsString = RestClient.readIt(is);
-        Logger.e("The response is: " + response + "  " + contentAsString);
+        Logger.e(contentAsString + " resp ");
+        JSONObject jsonObject = new JSONObject(contentAsString);
+        jsonObject = jsonObject.getJSONObject("response");
+        if (jsonObject.getString("status").equalsIgnoreCase("success")) {
+            model.photo = jsonObject.getString("mem_photo").substring(jsonObject.getString("mem_photo").lastIndexOf("/") + 1);
+        }
+        if(isupdate) {
+            Customer.updateDetails(RegisterActivity.this, model);
+        } else {
+            Customer.insertMember(RegisterActivity.this, model);
+        }
+        Logger.e(contentAsString);
     }
 
 }

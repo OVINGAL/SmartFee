@@ -26,6 +26,7 @@ public class JsonParser {
                 s.staffId = staffJson.getString("staff_id");
                 s.name = staffJson.getString("staff_name");
                 s.number = staffJson.getString("staff_phone");
+                s.email = staffJson.getString("staff_mail");
                 s.isActive = staffJson.getString("staff_status").equalsIgnoreCase("1");
                 staffs.add(s);
             }
@@ -48,6 +49,7 @@ public class JsonParser {
                 s.weight = staffJson.getString("mem_weight");
                 s.address = staffJson.getString("mem_address");
                 s.phone = staffJson.getString("mem_phone");
+                s.photo = staffJson.getString("mem_photo");
                 s.date = staffJson.getString("mem_joindate");
                 s.blocked = staffJson.getString("mem_status").equalsIgnoreCase("1") ? "No" : "Yes";
                 customers.add(s);
@@ -65,6 +67,7 @@ public class JsonParser {
                 s.weight = staffJson.getString("mem_weight");
                 s.address = staffJson.getString("mem_address");
                 s.phone = staffJson.getString("mem_phone");
+                s.photo = staffJson.getString("mem_photo");
                 s.date = staffJson.getString("mem_joindate");
                 s.blocked = staffJson.getString("mem_status").equalsIgnoreCase("1") ? "No" : "Yes";
                 customers.add(s);

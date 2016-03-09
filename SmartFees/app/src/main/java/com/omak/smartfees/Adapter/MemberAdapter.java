@@ -4,7 +4,10 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -12,9 +15,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.omak.smartfees.Global.Constants;
+import com.omak.smartfees.Global.Logger;
 import com.omak.smartfees.Global.Utils;
 import com.omak.smartfees.MemberDetailActivity;
 import com.omak.smartfees.Model.Customer;
@@ -26,6 +32,7 @@ import com.omak.smartfees.RegisterActivity;
 
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.ArrayList;
 
 /**
@@ -148,7 +155,15 @@ public class MemberAdapter extends RecyclerView.Adapter<MemberAdapter.ViewHolder
         holder.mName.setText(memberArrayList.get(position).name);
         holder.mPhone.setText(memberArrayList.get(position).phone);
         holder.mAddress.setText(memberArrayList.get(position).address);
-
+        if(memberArrayList.get(position).photo != null && memberArrayList.get(position).photo.length() > 0 ){
+            String imageurl = "http://gymapp.oddsoftsolutions.com/uploadedimages/" + memberArrayList.get(position).photo;
+            Logger.e(" Glide  " + imageurl);
+            Glide.with(context).load(imageurl)
+                    .error(R.drawable.ic_launcher)
+                    .into(holder.db);
+        } else {
+            holder.db.setImageResource(R.drawable.ic_launcher);
+        }
         if(memberArrayList.get(position).blocked.equalsIgnoreCase("NO")){
             holder.mBlock.setText("Block");
         }else {
@@ -170,6 +185,7 @@ public class MemberAdapter extends RecyclerView.Adapter<MemberAdapter.ViewHolder
         public EditText mName,mPhone,mAddress;
         public Button mUpdate,mDelete,mBlock,mDetails;
         public View layout;
+        public ImageView db;
 
         public IMyViewHolderClicks mListener;
 
@@ -183,6 +199,7 @@ public class MemberAdapter extends RecyclerView.Adapter<MemberAdapter.ViewHolder
             mDelete = (Button) v.findViewById(R.id.delete_mlist);
             mBlock = (Button) v.findViewById(R.id.block_mlist);
             mDetails = (Button) v.findViewById(R.id.details);
+            db = (ImageView)v.findViewById(R.id.member_dp);
             layout = v.findViewById(R.id.outer);
 
             layout.setOnClickListener(this);
@@ -227,7 +244,7 @@ public class MemberAdapter extends RecyclerView.Adapter<MemberAdapter.ViewHolder
         protected String doInBackground(String... strings) {
             param = "gymtag=deletemember&mem_id=" + id +"&gym_id=" + Utils.getStringSharedPreference(context,Constants.SHARED_GYM_ID);
             try {
-                String response = RestClient.httpPost(Url.STAFF_URL, param);
+                String response = RestClient.httpGet(Url.MEMBER_URL + "?" + param);
                 JSONObject jsonObject = new JSONObject(response);
                 jsonObject = jsonObject.getJSONObject("response");
                 if(jsonObject.getString("status").equalsIgnoreCase("success")) {
@@ -280,7 +297,7 @@ public class MemberAdapter extends RecyclerView.Adapter<MemberAdapter.ViewHolder
             }
             param = "gymtag="+tag+"&mem_id=" + id +"&gym_id=" + Utils.getStringSharedPreference(context,Constants.SHARED_GYM_ID);
             try {
-                String response = RestClient.httpPost(Url.STAFF_URL, param);
+                String response = RestClient.httpGet(Url.MEMBER_URL+"?" +param);
                 JSONObject jsonObject = new JSONObject(response);
                 jsonObject = jsonObject.getJSONObject("response");
                 if(jsonObject.getString("status").equalsIgnoreCase("success")) {

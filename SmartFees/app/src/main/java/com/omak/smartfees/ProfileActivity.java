@@ -13,13 +13,18 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.omak.smartfees.Adapter.StaffAdapter;
 import com.omak.smartfees.Global.Constants;
 import com.omak.smartfees.Global.Utils;
 import com.omak.smartfees.Model.Customer;
+import com.omak.smartfees.Model.Staff;
 import com.omak.smartfees.Network.RestClient;
 import com.omak.smartfees.Network.Url;
+import com.omak.smartfees.Parser.JsonParser;
 
 import org.json.JSONObject;
+
+import java.util.ArrayList;
 
 public class ProfileActivity extends AppCompatActivity {
 
@@ -63,7 +68,7 @@ public class ProfileActivity extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ChangePassword changePassword = new ChangePassword(ProfileActivity.this,true);
+                ChangePassword changePassword = new ChangePassword(ProfileActivity.this, true);
                 changePassword.setCanceledOnTouchOutside(false);
                 changePassword.show();
             }
@@ -87,7 +92,8 @@ public class ProfileActivity extends AppCompatActivity {
             }
         });
 
-
+        FetchProfileAsync fetchProfileAsync = new FetchProfileAsync();
+        fetchProfileAsync.execute();
     }
 
     private void attemptLogin() {
@@ -143,38 +149,61 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-//         Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_splash, menu);
-        return true;
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_logout) {
-            Utils.setStringSharedPreference(ProfileActivity.this, Constants.SHARED_GYM_ID, "");
-            Utils.setStringSharedPreference(ProfileActivity.this, Constants.SHARED_GYM_NAME, "");
-            Utils.setStringSharedPreference(ProfileActivity.this, "LastUpdatedTime", "");
-            Customer.deleteAllCustomer(ProfileActivity.this);
-            Utils.setBooleanSharedPreference(ProfileActivity.this, Constants.SHARED_PREF_IS_LOGGED_IN, false);
-            Intent intent = new Intent(ProfileActivity.this,LoginActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-            finish();
-            return true;
-        }
         if(item.getItemId()== android.R.id.home) {
             finish();
         }
         return super.onOptionsItemSelected(item);
     }
 
+    private class FetchProfileAsync extends AsyncTask<Void,Void,String>{
+
+        String param;
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            dialog = new ProgressDialog(ProfileActivity.this);
+            dialog.setMessage("Loading...");
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.show();
+        }
+
+        @Override
+        protected String doInBackground(Void... voids) {
+            param = "gym_id=" + Utils.getStringSharedPreference(ProfileActivity.this,Constants.SHARED_GYM_ID);
+            try {
+                String response = RestClient.httpGet(Url.HOME_URL + param);
+                return response;
+            } catch (Exception e) {
+                return "";
+            }
+        }
+
+        @Override
+        protected void onPostExecute(String home) {
+            super.onPostExecute(home);
+            if(dialog != null && dialog.isShowing()){
+                dialog.dismiss();
+            }
+            try {
+
+
+                if (home != null && home.length() > 0) {
+                    JSONObject jsonObject = new JSONObject(home);
+                    if(jsonObject.has("viewprofile")) {
+                        JSONObject homeJson = jsonObject.getJSONObject("viewprofile");
+                        mName.setText(homeJson.getString("gym_name"));
+                        mAddress.setText(homeJson.getString("gym_address"));
+                        mOwner.setText(homeJson.getString("gym_person"));
+                        mEmail.setText(homeJson.getString("gym_mail"));
+                        mNumberView.setText(homeJson.getString("gym_phone"));
+                    }
+                }
+            } catch (Exception e){
+
+            }
+        }
+    }
     public class UserUpdateTask extends AsyncTask<Void, Void, String> {
 
         private final String mNumber;

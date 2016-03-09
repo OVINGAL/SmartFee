@@ -55,13 +55,26 @@ public class ChangePassword extends Dialog {
                  } else if(newPass.getText().length() < 5 ) {
                      newPass.setError(getContext().getString(R.string.error_invalid_password));
                  } else if(newPass.getText().toString().equalsIgnoreCase(newPassCnf.getText().toString())) {
-                     changePassTask task = new changePassTask();
-                     task.execute(newPass.getText().toString(),oldPass.getText().toString());
+                     if(Utils.checkNetwork(getContext())) {
+                         changePassTask task = new changePassTask();
+                         task.execute(newPass.getText().toString(), oldPass.getText().toString());
+                     } else {
+                         Toast.makeText(getContext(),"No network connection available",Toast.LENGTH_LONG).show();
+                     }
                  } else {
                      newPassCnf.setError(getContext().getString(R.string.error_invalid_password));
                  }
              } else {
-
+                    if(mEmail.getText().toString().isEmpty()) {
+                        mEmail.setError(getContext().getString(R.string.error_field_required));
+                    } else {
+                        if(Utils.checkNetwork(getContext())) {
+                            forgorPassTask forgorPassTask = new forgorPassTask();
+                            forgorPassTask.execute(mEmail.getText().toString());
+                        } else {
+                            Toast.makeText(getContext(),"No network connection available",Toast.LENGTH_LONG).show();
+                        }
+                    }
              }
             }
         });
@@ -105,7 +118,7 @@ public class ChangePassword extends Dialog {
                 if(jsonObject.getString("status").equalsIgnoreCase("success")) {
                     return jsonObject.getString("status");
                 } else {
-                    return jsonObject.getString("status");
+                    return jsonObject.getString("status_msg");
                 }
 
             } catch (Exception e) {
@@ -126,5 +139,49 @@ public class ChangePassword extends Dialog {
 
     }
 
+    public class forgorPassTask extends AsyncTask<String, Void, String> {
+
+        String param;
+        ProgressDialog dialog;
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            dialog = new ProgressDialog(getContext());
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.setMessage("Updating...");
+            dialog.show();
+        }
+
+        @Override
+        public String doInBackground(String... params) {
+
+            url = "http://gymapp.oddsoftsolutions.com/gym_forgot.php?gymtag=forgotpass&txtmail=" + params[0];
+            try {
+                String response = RestClient.httpGet(url);
+                JSONObject jsonObject = new JSONObject(response);
+                jsonObject = jsonObject.getJSONObject("response");
+                if(jsonObject.getString("status").equalsIgnoreCase("success")) {
+                    return jsonObject.getString("status_msg");
+                } else {
+                    return jsonObject.getString("status_msg");
+                }
+
+            } catch (Exception e) {
+                return e.getMessage();
+            }
+
+
+        }
+
+        @Override
+        protected void onPostExecute(final String success) {
+            if(dialog != null && dialog.isShowing()){
+                dialog.dismiss();
+            }
+            dismiss();
+            Toast.makeText(getContext(),success,Toast.LENGTH_SHORT).show();
+        }
+
+    }
 
 }

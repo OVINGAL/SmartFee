@@ -31,6 +31,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.omak.smartfees.Global.Constants;
+import com.omak.smartfees.Global.Logger;
 import com.omak.smartfees.Global.Utils;
 import com.omak.smartfees.Network.RestClient;
 import com.omak.smartfees.Network.Url;
@@ -227,20 +228,23 @@ public class LoginActivity extends AppCompatActivity {
                 JSONObject jsonObject = new JSONObject(response);
                 jsonObject = jsonObject.getJSONObject("response");
                 if(jsonObject.getString("status").equalsIgnoreCase("success")) {
+                    Utils.setStringSharedPreference(LoginActivity.this, "username",mNumber);
+                    Utils.setStringSharedPreference(LoginActivity.this, "pass",mPassword);
                     Utils.setStringSharedPreference(LoginActivity.this, Constants.SHARED_GYM_ID,jsonObject.getString("gym_id"));
                     Utils.setStringSharedPreference(LoginActivity.this, Constants.SHARED_GYM_NAME, jsonObject.getString("gym_name"));
                     Utils.setBooleanSharedPreference(LoginActivity.this, Constants.SHARED_PREF_IS_LOGGED_IN, true);
-                    Utils.setStringSharedPreference(LoginActivity.this, Constants.SHARED_STAFF_ID, jsonObject.getString("staff_id"));
                     Utils.setStringSharedPreference(LoginActivity.this, Constants.SHARED_STAFF_TYPE, jsonObject.getString("staff_type"));
                     Utils.setStringSharedPreference(LoginActivity.this, Constants.SHARED_GYM_STATUS, jsonObject.getString("gym_status"));
+                    Logger.e(jsonObject.getString("staff_type"));
                     if(jsonObject.getString("staff_type").equalsIgnoreCase("owner")) {
                         Utils.setBooleanSharedPreference(LoginActivity.this,Constants.SHARED_PREF_IS_OWNER,true);
                     } else {
                         Utils.setBooleanSharedPreference(LoginActivity.this,Constants.SHARED_PREF_IS_OWNER,false);
+                        Utils.setStringSharedPreference(LoginActivity.this, Constants.SHARED_STAFF_ID, jsonObject.getString("staff_id"));
                     }
                     return jsonObject.getString("status");
                 } else {
-                    return jsonObject.getString("error_msg");
+                    return jsonObject.getString("status_msg");
                 }
 
             } catch (Exception e) {

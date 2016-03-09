@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.EditText;
 
 import com.omak.smartfees.Global.Constants;
+import com.omak.smartfees.Global.Logger;
 import com.omak.smartfees.Global.Utils;
 import com.omak.smartfees.Network.RestClient;
 import com.omak.smartfees.Network.Url;
@@ -211,12 +212,28 @@ public class SignUpActivity extends AppCompatActivity {
                 JSONObject jsonObject = new JSONObject(response);
                 jsonObject = jsonObject.getJSONObject("response");
                 if(jsonObject.getString("status").equalsIgnoreCase("success")) {
+                    Utils.setStringSharedPreference(SignUpActivity.this, "username",mNumber);
+                    Utils.setStringSharedPreference(SignUpActivity.this, "pass",mPassword);
                     Utils.setStringSharedPreference(SignUpActivity.this, Constants.SHARED_GYM_ID, jsonObject.getString("gym_id"));
-                    Utils.setStringSharedPreference(SignUpActivity.this, Constants.SHARED_GYM_NAME,jsonObject.getString("gym_name"));
-                    Utils.setBooleanSharedPreference(SignUpActivity.this,Constants.SHARED_PREF_IS_LOGGED_IN,true);
+                    Utils.setStringSharedPreference(SignUpActivity.this, Constants.SHARED_GYM_NAME, jsonObject.getString("gym_name"));
+                    Utils.setBooleanSharedPreference(SignUpActivity.this, Constants.SHARED_PREF_IS_LOGGED_IN, true);
+                    if(jsonObject.has("staff_type")) {
+                        Utils.setStringSharedPreference(SignUpActivity.this, Constants.SHARED_STAFF_TYPE, jsonObject.getString("staff_type"));
+                        if (jsonObject.getString("staff_type").equalsIgnoreCase("owner")) {
+                            Utils.setBooleanSharedPreference(SignUpActivity.this, Constants.SHARED_PREF_IS_OWNER, true);
+                        } else {
+                            Utils.setBooleanSharedPreference(SignUpActivity.this, Constants.SHARED_PREF_IS_OWNER, false);
+                            if(jsonObject.has("staff_type")) {
+                                Utils.setStringSharedPreference(SignUpActivity.this, Constants.SHARED_STAFF_ID, jsonObject.getString("staff_id"));
+                            }
+                        }
+                    }
+                    if(jsonObject.has("gym_status")) {
+                        Utils.setStringSharedPreference(SignUpActivity.this, Constants.SHARED_GYM_STATUS, jsonObject.getString("gym_status"));
+                    }
                     return jsonObject.getString("status");
                 } else {
-                    return jsonObject.getString("status");
+                    return jsonObject.getString("status_msg");
                 }
 
             } catch (Exception e) {

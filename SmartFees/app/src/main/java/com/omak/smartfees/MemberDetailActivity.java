@@ -4,7 +4,10 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -13,15 +16,20 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.omak.smartfees.Global.Constants;
+import com.omak.smartfees.Global.Logger;
 import com.omak.smartfees.Global.Utils;
 import com.omak.smartfees.Model.Customer;
 import com.omak.smartfees.Network.RestClient;
 import com.omak.smartfees.Network.Url;
 
 import org.json.JSONObject;
+
+import java.io.File;
 
 public class MemberDetailActivity extends AppCompatActivity implements View.OnClickListener{
 
@@ -30,6 +38,7 @@ public class MemberDetailActivity extends AppCompatActivity implements View.OnCl
     private EditText mDate;
     private EditText mName;
     private Customer member;
+    private ImageView db;
     MemberRegisterTask mAuthTask;
     boolean isupdate = true;
 
@@ -47,6 +56,7 @@ public class MemberDetailActivity extends AppCompatActivity implements View.OnCl
         mRegnum = (EditText)findViewById(R.id.member_reg);
         mAddress = (EditText)findViewById(R.id.member_address);
         mDate = (EditText)findViewById(R.id.member_date);
+        db = (ImageView)findViewById(R.id.db);
         findViewById(R.id.delete_btn).setOnClickListener(this);
         findViewById(R.id.block_btn).setOnClickListener(this);
         findViewById(R.id.pay_btn).setOnClickListener(this);
@@ -65,6 +75,16 @@ public class MemberDetailActivity extends AppCompatActivity implements View.OnCl
             } else {
                 ((Button)findViewById(R.id.block_btn)).setText("Block");
             }
+            if(member.photo != null && member.photo.length() > 0 ){
+                String imageurl = "http://gymapp.oddsoftsolutions.com/uploadedimages/" + member.photo;
+                Logger.e(" Glide  " + imageurl);
+                Glide.with(MemberDetailActivity.this).load(imageurl)
+                        .error(R.drawable.ic_launcher)
+                        .into(db);
+            } else {
+                db.setImageResource(R.drawable.ic_launcher);
+            }
+
         }
 
     }

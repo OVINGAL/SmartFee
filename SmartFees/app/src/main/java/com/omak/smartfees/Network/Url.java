@@ -10,4 +10,6 @@ public class Url {
 
     public static String LOGIN_URL = BASE_URL + "LoginServices?model=Login&";
 
+    public static String HOME_URL = BASE_URL + "?gymtag=viewprofile&";
+
 }
