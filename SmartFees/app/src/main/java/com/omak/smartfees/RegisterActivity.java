@@ -31,6 +31,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.GlideBitmapDrawable;
 import com.omak.smartfees.Global.Constants;
 import com.omak.smartfees.Global.Logger;
 import com.omak.smartfees.Global.Utils;
@@ -131,18 +132,24 @@ public class RegisterActivity extends AppCompatActivity {
         findViewById(R.id.rotate).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(bitmap == null) {
-                    bitmap = ((BitmapDrawable)db.getDrawable()).getBitmap();
+                if(bitmap == null && member != null && member.photo != null && member.photo.length() > 0) {
+                    if (db.getDrawable() instanceof BitmapDrawable) {
+                        bitmap = ((BitmapDrawable) db.getDrawable()).getBitmap();
+                    } else if (db.getDrawable() instanceof GlideBitmapDrawable) {
+                        bitmap = ((GlideBitmapDrawable) db.getDrawable()).getBitmap();
+                    }
                 }
-                Matrix matrix = new Matrix();
-                matrix.setRotate(90);
-                try {
-                    Bitmap bmRotated = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-                    bitmap.recycle();
-                    bitmap = bmRotated;
-                    db.setImageBitmap(bmRotated);
-                } catch (OutOfMemoryError e) {
-                    e.printStackTrace();
+                if(bitmap != null) {
+                    Matrix matrix = new Matrix();
+                    matrix.setRotate(90);
+                    try {
+                        Bitmap bmRotated = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+                        bitmap.recycle();
+                        bitmap = bmRotated;
+                        db.setImageBitmap(bmRotated);
+                    } catch (OutOfMemoryError e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         });
@@ -264,6 +271,14 @@ public class RegisterActivity extends AppCompatActivity {
         } catch (Exception e) {
             Toast.makeText(this, "Something went wrong  " + e.getMessage() , Toast.LENGTH_LONG)
                     .show();
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        if(bitmap != null){
+            bitmap.recycle();
         }
     }
 
@@ -468,7 +483,7 @@ public class RegisterActivity extends AppCompatActivity {
                     JSONObject jsonObject = new JSONObject(response);
                     jsonObject = jsonObject.getJSONObject("response");
                     if (jsonObject.getString("status").equalsIgnoreCase("success")) {
-                        model.stored = "yes";
+                        model.stored = "Yes";
                         if(!isupdate) {
                             model.memberId = jsonObject.getString("mem_id");
                             memID = model.memberId;
@@ -493,7 +508,11 @@ public class RegisterActivity extends AppCompatActivity {
                 if(isupdate) {
                     Customer.updateDetails(RegisterActivity.this, model);
                 } else {
-                    Customer.insertMember(RegisterActivity.this, model);
+                    if(Customer.isRegNumExist(RegisterActivity.this,model.gymId,model.regNum)) {
+                        return "Repeated Register number";
+                    } else {
+                        Customer.insertMember(RegisterActivity.this, model);
+                    }
                 }
                 return "success";
             }

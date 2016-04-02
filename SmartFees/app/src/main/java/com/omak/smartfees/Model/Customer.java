@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.support.v4.content.CursorLoader;
 
 import com.omak.smartfees.DB.ContentProviderDb;
+import com.omak.smartfees.Global.Logger;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -53,10 +54,12 @@ public class Customer implements Serializable{
 	public static final String DELETED = "deleted";
 
 	public String stored = "";
-	public static final String STORED = "stored";
+	public static final String STORED = "modify";
 
 	public String photo = "";
 	public static final String PHOTO = "photo";
+
+	public Fees fees;
 
 	public Customer(){
 		gymId = "";
@@ -87,6 +90,7 @@ public class Customer implements Serializable{
 
 	private static ContentValues convertToContentValues(Customer stud) {
 		ContentValues contentvalues = new ContentValues();
+		contentvalues.put(ID, stud._id);
 		contentvalues.put(MEMBER_ID, stud.memberId);
 		contentvalues.put(GYM_ID, stud.gymId);
 		contentvalues.put(REG_NO, stud.regNum);
@@ -180,7 +184,7 @@ public class Customer implements Serializable{
 	public static ArrayList<Customer> getAllMemberListInGymNotUpdated(Context context,String gym_id) {
 		ArrayList<Customer> studentList = new ArrayList<Customer>();
 		Uri contentUri = Uri.withAppendedPath(ContentProviderDb.CONTENT_URI, TABLE_CUSTOMER_DB);
-		String selection = GYM_ID+ " = '" +gym_id+"' AND " + STORED + " = 'No'";
+		String selection = GYM_ID+ " = '" +gym_id+"' AND " + STORED + " = 'no'" +" AND " + DELETED + " != 'yes'";
 		Cursor cursor = context.getContentResolver().query(contentUri, null, selection, null, NAME + " ASC");
 		if (cursor != null && cursor.getCount() > 0) {
 			cursor.moveToFirst();
@@ -195,7 +199,7 @@ public class Customer implements Serializable{
 	public static ArrayList<Customer> getAllMemberListInGymDeleted(Context context,String gym_id) {
 		ArrayList<Customer> studentList = new ArrayList<Customer>();
 		Uri contentUri = Uri.withAppendedPath(ContentProviderDb.CONTENT_URI, TABLE_CUSTOMER_DB);
-		String selection = GYM_ID+ " = '" +gym_id+"' AND " + DELETED + " = 'Yes'";
+		String selection = GYM_ID+ " = '" +gym_id+"' AND " + DELETED + " = 'yes'";
 		Cursor cursor = context.getContentResolver().query(contentUri, null, selection, null, NAME + " ASC");
 		if (cursor != null && cursor.getCount() > 0) {
 			cursor.moveToFirst();
@@ -206,6 +210,19 @@ public class Customer implements Serializable{
 		cursor.close();
 		return studentList;
 	}
+
+	public static boolean isRegNumExist(Context context,String gym_id,String regnum) {
+		ArrayList<Customer> studentList = new ArrayList<Customer>();
+		Uri contentUri = Uri.withAppendedPath(ContentProviderDb.CONTENT_URI, TABLE_CUSTOMER_DB);
+		String selection = GYM_ID+ " = '" +gym_id+"' AND " + REG_NO + " = '" + regnum +"'";
+		Cursor cursor = context.getContentResolver().query(contentUri, null, selection, null, NAME + " ASC");
+		if (cursor != null && cursor.getCount() > 0) {
+			return true;
+		}
+		cursor.close();
+		return false;
+	}
+
 //	public static CursorLoader getStudentListInClassCursor(Context context,String selectedClass) {
 //		Uri contentUri = Uri.withAppendedPath(ContentProviderDb.CONTENT_URI, TABLE_CUSTOMER_DB);
 //		String selection = CLASS_DIV+ " = '" +selectedClass+"'";
@@ -225,10 +242,11 @@ public class Customer implements Serializable{
 		return student;
 	}
 	
-	public static final long updateDetails(Context context,Customer s) {
+	public static final int updateDetails(Context context,Customer s) {
 		ContentValues initialvalues = convertToContentValues(s);
 		Uri contentUri = Uri.withAppendedPath(ContentProviderDb.CONTENT_URI, TABLE_CUSTOMER_DB);
 		int resultUri = context.getContentResolver().update(contentUri, initialvalues, ID+"=?", new String[] {s._id});
+		Logger.e("Update status  " + resultUri);
 		return resultUri;
 	}
 	

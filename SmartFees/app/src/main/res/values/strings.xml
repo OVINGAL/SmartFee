@@ -26,4 +26,8 @@
     <string name="action_register">Register</string>
     <string name="title_activity_staffs">Staffs</string>
 
+    <array name="fees_status" >
+        <item> Paid </item>
+        <item> Not Paid </item>
+    </array>
 </resources>

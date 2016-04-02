@@ -124,9 +124,9 @@ public class MemberDetailActivity extends AppCompatActivity implements View.OnCl
                             s.deleted = "Yes";
                             s.stored = "No";
                             if(s.memberId.length() > 0){
-                                Customer.deleteCustomer(MemberDetailActivity.this, s.regNum);
+                                int r = Customer.updateDetails(MemberDetailActivity.this, s);
                             } else {
-                                Customer.updateDetails(MemberDetailActivity.this, s);
+                                Customer.deleteCustomer(MemberDetailActivity.this, s.regNum);
                             }
                         }
                     }
@@ -204,7 +204,7 @@ public class MemberDetailActivity extends AppCompatActivity implements View.OnCl
         protected String doInBackground(String... strings) {
             param = "gymtag=deletemember&mem_id=" + id +"&gym_id=" + Utils.getStringSharedPreference(MemberDetailActivity.this,Constants.SHARED_GYM_ID);
             try {
-                String response = RestClient.httpPost(Url.STAFF_URL, param);
+                String response = RestClient.httpPost(Url.MEMBER_URL, param);
                 JSONObject jsonObject = new JSONObject(response);
                 jsonObject = jsonObject.getJSONObject("response");
                 if(jsonObject.getString("status").equalsIgnoreCase("success")) {
@@ -258,7 +258,7 @@ public class MemberDetailActivity extends AppCompatActivity implements View.OnCl
             }
             param = "gymtag="+tag+"&mem_id=" + id +"&gym_id=" + Utils.getStringSharedPreference(MemberDetailActivity.this,Constants.SHARED_GYM_ID);
             try {
-                String response = RestClient.httpPost(Url.STAFF_URL, param);
+                String response = RestClient.httpPost(Url.MEMBER_URL, param);
                 JSONObject jsonObject = new JSONObject(response);
                 jsonObject = jsonObject.getJSONObject("response");
                 if(jsonObject.getString("status").equalsIgnoreCase("success")) {

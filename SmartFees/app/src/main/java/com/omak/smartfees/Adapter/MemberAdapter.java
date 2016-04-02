@@ -89,9 +89,9 @@ public class MemberAdapter extends RecyclerView.Adapter<MemberAdapter.ViewHolder
                                     s.deleted = "Yes";
                                     s.stored = "No";
                                     if(s.memberId.length() > 0){
-                                        Customer.deleteCustomer(context, s.regNum);
-                                    } else {
                                         Customer.updateDetails(context, s);
+                                    } else {
+                                        Customer.deleteCustomer(context, s.regNum);
                                     }
                                 }
                                 memberArrayList.remove(pos);
@@ -169,6 +169,7 @@ public class MemberAdapter extends RecyclerView.Adapter<MemberAdapter.ViewHolder
         }else {
             holder.mBlock.setText("Activate");
         }
+        Logger.e("Stored  :  " + memberArrayList.get(position).stored);
     }
 
     // Return the size of your dataset (invoked by the layout manager)

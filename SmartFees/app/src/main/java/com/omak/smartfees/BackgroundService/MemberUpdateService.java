@@ -50,6 +50,7 @@ public class MemberUpdateService extends IntentService {
         if (intent != null) {
             String id = intent.getStringExtra("Id");
             ArrayList<Customer> customers = Customer.getAllMemberListInGymNotInsterted(this, id);
+            Logger.e("New count : " + customers.size());
             for (Customer model:customers) {
                 if(Utils.checkNetwork(this)) {
 
@@ -72,7 +73,28 @@ public class MemberUpdateService extends IntentService {
                 }
             }
 
+            customers = Customer.getAllMemberListInGymDeleted(this, id);
+            Logger.e("Delete count : " + customers.size());
+            for (Customer model:customers) {
+                if(Utils.checkNetwork(this)) {
+
+                    String param = "gymtag=deletemember&mem_id=" + model.memberId +"&gym_id=" + id;
+                    try {
+                        String response = RestClient.httpPost(Url.MEMBER_URL, param);
+                        JSONObject jsonObject = new JSONObject(response);
+                        jsonObject = jsonObject.getJSONObject("response");
+                        if(jsonObject.getString("status").equalsIgnoreCase("success")) {
+                            Customer.deleteCustomer(this, model.regNum);
+                        } else {
+                        }
+
+                    } catch (Exception e) {
+                    }
+                }
+            }
+
             customers = Customer.getAllMemberListInGymNotUpdated(this, id);
+            Logger.e("Update count : " + customers.size());
             for (Customer model:customers) {
                 if(Utils.checkNetwork(this)) {
                     //s.blocked = staffJson.getString("mem_status").equalsIgnoreCase("1") ? "No" : "Yes";
@@ -86,28 +108,10 @@ public class MemberUpdateService extends IntentService {
                         JSONObject jsonObject = new JSONObject(response);
                         jsonObject = jsonObject.getJSONObject("response");
                         if (jsonObject.getString("status").equalsIgnoreCase("success")) {
-                            model.stored = "yes";
-                            Customer.updateDetails(this, model);
-                        }
-
-                    } catch (Exception e) {
-                    }
-                }
-            }
-
-
-            customers = Customer.getAllMemberListInGymDeleted(this, id);
-            for (Customer model:customers) {
-                if(Utils.checkNetwork(this)) {
-
-                    String param = "gymtag=deletemember&mem_id=" + model.memberId +"&gym_id=" + id;
-                    try {
-                        String response = RestClient.httpPost(Url.STAFF_URL, param);
-                        JSONObject jsonObject = new JSONObject(response);
-                        jsonObject = jsonObject.getJSONObject("response");
-                        if(jsonObject.getString("status").equalsIgnoreCase("success")) {
-                            Customer.deleteCustomer(this, model.regNum);
-                        } else {
+                            model.stored = "Yes";
+                            Logger.e("Update");
+                            int k  = Customer.updateDetails(this, model);
+                            Logger.e("Update After  " + k);
                         }
 
                     } catch (Exception e) {
@@ -130,6 +134,7 @@ public class MemberUpdateService extends IntentService {
                     members = JsonParser.parseMemberList(response);
                     for (Customer model : members) {
                         model.gymId = id;
+                        model.stored = "yes";
                         if(Customer.insertMember(this,model) < 0){
                             Customer.updateDetails(this,model);
                         }
